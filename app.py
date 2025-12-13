@@ -43,7 +43,7 @@ async def get_attractions(request:Request, page:int = Query(...,ge=0), category:
 	else:
 		all_pages = all_count//attraction_in_page+1
 		
-	if page >= all_pages:
+	if page >= all_pages-1:
 		nextPage = None
 	elif page>=0:
 		nextPage = page+1
