@@ -32,25 +32,6 @@ async def get_attractions(request:Request, page:int = Query(...,ge=0), category:
 	conn = get_connection()
 	cursor = conn.cursor()
 	
-	#計算總共有幾頁
-	sql = "SELECT COUNT(*) FROM attraction"
-	cursor.execute(sql)
-	all_count=cursor.fetchone()[0]
-	all_pages=0
-	attraction_in_page = 8
-	if all_count%attraction_in_page ==0:
-		all_pages = all_count/attraction_in_page
-	else:
-		all_pages = all_count//attraction_in_page+1
-		
-	if page >= all_pages-1:
-		nextPage = None
-	elif page>=0:
-		nextPage = page+1
-	
-		
-	offset = attraction_in_page *(page)
-	
 
 	#組裝回傳的data
 	if category:
@@ -60,22 +41,90 @@ async def get_attractions(request:Request, page:int = Query(...,ge=0), category:
 		MRT=keyword
 		name=f"%{keyword}%"
 
+	search_data = []
+	nextPage = None
+	all_pages=0
+	attraction_in_page = 8
+	offset = attraction_in_page *(page)
 	if category and keyword:
 		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE CAT= %s AND (MRT = %s OR name like %s)  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
 		cursor.execute(sql,(category,MRT,name,offset))
+		search_data = cursor.fetchall()
+		#計算總共有幾頁
+		sql = "SELECT COUNT(*) FROM attraction WHERE CAT= %s AND (MRT = %s OR name like %s)"
+		cursor.execute(sql,(category,MRT,name))
+		all_count=cursor.fetchone()[0]
+		if all_count%attraction_in_page ==0:
+			all_pages = all_count//attraction_in_page
+			if all_pages == 0:
+				all_pages = 1
+		else:
+			all_pages = all_count//attraction_in_page+1
+			
+		if page >= all_pages-1:
+			nextPage = None
+		elif page>=0:
+			nextPage = page+1
 	elif category:
 		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE CAT= %s  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
 		cursor.execute(sql,(category,offset))
-
+		search_data = cursor.fetchall()
+		#計算總共有幾頁
+		sql = "SELECT COUNT(*) FROM attraction WHERE CAT= %s"
+		cursor.execute(sql,(category,))
+		all_count=cursor.fetchone()[0]
+		if all_count%attraction_in_page ==0:
+			all_pages = all_count//attraction_in_page
+			if all_pages == 0:
+				all_pages = 1
+		else:
+			all_pages = all_count//attraction_in_page+1
+			
+		if page >= all_pages-1:
+			nextPage = None
+		elif page>=0:
+			nextPage = page+1
 	elif keyword:
 		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE (MRT = %s OR name like %s)  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
-		cursor.execute(sql,(MRT,name,offset))	
+		cursor.execute(sql,(MRT,name,offset))
+		search_data = cursor.fetchall()
+		#計算總共有幾頁
+		sql = "SELECT COUNT(*) FROM attraction WHERE (MRT = %s OR name like %s)"
+		cursor.execute(sql,(MRT,name))
+		all_count=cursor.fetchone()[0]
+		if all_count%attraction_in_page ==0:
+			all_pages = all_count//attraction_in_page
+			if all_pages == 0:
+				all_pages = 1
+		else:
+			all_pages = all_count//attraction_in_page+1
+			
+		if page >= all_pages-1:
+			nextPage = None
+		elif page>=0:
+			nextPage = page+1
 	
 	else:
 		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
 		cursor.execute(sql,(offset, ))
-	search_data = cursor.fetchall()
-	
+		search_data = cursor.fetchall()
+		#計算總共有幾頁
+		sql = "SELECT COUNT(*) FROM attraction"
+		cursor.execute(sql)
+		all_count=cursor.fetchone()[0]
+		if all_count%attraction_in_page ==0:
+			all_pages = all_count//attraction_in_page
+			if all_pages == 0:
+				all_pages = 1
+		else:
+			all_pages = all_count//attraction_in_page+1
+			
+		if page >= all_pages-1:
+			nextPage = None
+		elif page>=0:
+			nextPage = page+1
+
+
 	##找出所有的attraction_id
 	ids = []
 	for i in search_data:
@@ -190,7 +239,7 @@ async def get_categories(request:Request):
 	return response
 
 @app.get("/api/mrts")
-async def get_categories(request:Request):
+async def get_mrts(request:Request):
 	conn = get_connection()
 	cursor = conn.cursor()
 
