@@ -21,7 +21,7 @@ footer >img {
 
 footer > p {
   position: absolute;  /* 絕對定位 */
-  bottom: 36px;          /* 對齊底部 */
+  bottom: 41px;          /* 對齊底部 */
   left: 0;            /* 對齊左側 */
   right: 0;           /* 對齊右側 */
   text-align: center;
