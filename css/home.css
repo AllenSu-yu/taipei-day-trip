@@ -202,6 +202,7 @@ footer > p {
   max-width: 300px; /* 限制最大寬度 */
   box-sizing: border-box;
   padding-left: 10px;
+  border: none;
 }
 
 #searchBtn {
@@ -307,6 +308,8 @@ footer > p {
   min-height: 242px; /* 圖片高度 197px + description 高度 45px */
   display: flex;
   flex-direction: column;
+  border-radius: 5px 5px 5px 5px;
+  border: 1px solid #E8E8E8;
 }
 
 #attraction_card > .attraction-item > img {
@@ -315,6 +318,7 @@ footer > p {
   object-fit: cover;
   display: block; /* 移除圖片下方的間隙 */
   flex-shrink: 0; /* 防止圖片被壓縮 */
+  border-radius: 5px 5px 0 0;
 }
 
 .name {
