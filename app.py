@@ -1,11 +1,14 @@
 from fastapi import *
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles# 在 app = FastAPI() 之後加入
 import mysql.connector
 from mysql.connector import pooling
 import os
 from dotenv import load_dotenv
 load_dotenv()  # 載入 .env 檔案
 app=FastAPI()
+app.mount("/css", StaticFiles(directory="css"), name="css")
+app.mount("/image", StaticFiles(directory="image"), name="image")
 
 dbconfig = {
 	"host": os.getenv("DB_HOST", "localhost"),
@@ -132,8 +135,10 @@ async def get_attractions(request:Request, page:int = Query(...,ge=0), category:
 		ids.append(attraction_id)
 
 	if ids:
-		sql = f"SELECT attraction_id,file FROM image WHERE attraction_id in {tuple(ids)} ORDER BY attraction_id ASC"
-		cursor.execute(sql)
+		# 使用參數化查詢，避免 SQL 注入和語法錯誤
+		placeholders = ','.join(['%s'] * len(ids))
+		sql = f"SELECT attraction_id,file FROM image WHERE attraction_id IN ({placeholders}) ORDER BY attraction_id ASC"
+		cursor.execute(sql, tuple(ids))
 		search_image = cursor.fetchall()	
 	else:
 		search_image = []
@@ -277,3 +282,4 @@ async def booking(request: Request):
 @app.get("/thankyou", include_in_schema=False)
 async def thankyou(request: Request):
 	return FileResponse("./static/thankyou.html", media_type="text/html")
+

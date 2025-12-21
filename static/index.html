@@ -3,9 +3,339 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Index</title>
+  <title>台北一日遊</title>
+  <link rel="stylesheet" href="/css/home.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <header>
+    <div class="home__header">
+      <div class="home__header__title">台北一日遊 </div>
+      <div class="home__header__button">
+        <div>預定行程</div>
+        <div>登入/註冊</div>
+      </div>
+    </div>
+  </header>
+  <div class="banner">
+    <div class="banner__content">
+      <div class="banner__text">
+        <h1 class="banner__text1">輕鬆享受台北一日悠閒</h1>
+        <h2 class="banner__text2">探索每個角落，體驗城市的深度旅遊行程</h2>
+      </div>
+      <div class="search-container">
+        <div class="category-toggle">
+          <button id="toggleBtn">全部分類▼</button>
+          <div id="categoryMenu" class="category-menu hidden">
+            <div class="category-option" data-value="">全部分類</div>
+          </div>
+        </div>
+      
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="輸入景點名稱查詢" />
+          <button id="searchBtn" onclick="search_attracion()"><img src="/image/search.png" alt="搜尋"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mrt_container">
+    <div class="mrt_list">
+      <img id="leftArrow" src="/image/left_arrow.png" alt="←" style="cursor: pointer;">
+      <div id="mrt"></div>
+      <img id="rightArrow" src="/image/right_arrow.png" alt="→" style="cursor: pointer;">
+    </div>
+  </div>
+
+  <div class="attraction_container">
+    <div id="attraction_card">
+
+    </div>
+  </div>
+
+  <div id="noData"></div>
+
+  <footer>
+    <img src="/image/footer_clean.png" alt="COPYRIGHT © 2021 台北一日遊">
+    <p>COPYRIGHT © 2021 台北一日遊</p>
+  </footer>
+  <div id="sentinel"></div>
+
+
+  <script>
+    const toggleBtn = document.getElementById('toggleBtn');
+    const categoryMenu = document.getElementById('categoryMenu');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchInput = document.getElementById('searchInput');
+    const mrt = document.getElementById('mrt');
+    // 取得景點的類別
+    async function get_categories(params) {
+      let response = await fetch ("/api/categories", {
+        method:"GET"
+      });
+      let result = await response.json()
+
+      
+      // 依序插入 API 回傳的分類（保留「全部分類」）
+      result.data.forEach(category => {
+        const categoryOption = document.createElement('div');
+        categoryOption.className = 'category-option';
+        categoryOption.setAttribute('data-value', category + '▼');
+        categoryOption.textContent = category;
+        categoryMenu.appendChild(categoryOption);
+      });
+    }
+    
+    get_categories()
+
+    let selectedCategory = '';
+
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // 阻止事件冒泡到 document
+      categoryMenu.classList.toggle('hidden');
+    });
+
+    // 使用事件委派處理動態生成的分類選項點擊事件
+    categoryMenu.addEventListener('click', (e) => {
+      if (e.target.classList.contains('category-option')) {
+        selectedCategory = e.target.getAttribute('data-value');
+        toggleBtn.textContent = selectedCategory || '全部分類▼';
+        categoryMenu.classList.add('hidden');
+      }
+    });
+
+    // 點擊頁面其他地方時關閉選單
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.category-toggle')) {
+        categoryMenu.classList.add('hidden');
+        toggleBtn.textContent = selectedCategory || '全部分類▼';
+      }
+    });
+
+    searchBtn.addEventListener('click', () => {
+      const keyword = searchInput.value.trim();
+      console.log('搜尋關鍵字:', keyword);
+      console.log('選擇分類:', selectedCategory);
+      // 這裡可以串接 API 或更新畫面
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchBtn.click();
+      }
+    });
+
+    //獲取MRT後插入到頁面
+    async function get_mrts(params) {
+      let response = await fetch ("/api/mrts", {
+        method: "GET"
+      });
+      let result = await response.json()
+      
+      result.data.forEach(mrts =>{
+      const mrt_list = document.createElement('div');
+      mrt_list.textContent = mrts;
+      mrt.appendChild(mrt_list);
+      
+    });
   
+    // 使用事件委派，統一處理所有 MRT 站點的 hover 效果（放在 forEach 外面）
+    mrt.addEventListener('mouseover', (e) => {
+      if (e.target.tagName === 'DIV' && e.target.parentElement === mrt) {
+        e.target.style.color = '#000000'; // hover 時的顏色
+        e.target.style.cursor = 'pointer';
+      }
+    });
+
+    mrt.addEventListener('mouseout', (e) => {
+      if (e.target.tagName === 'DIV' && e.target.parentElement === mrt) {
+        e.target.style.color = '#666666'; // mouseout 時的顏色
+      }
+    });
+
+    mrt.addEventListener('click', (e) => {
+      if (e.target.tagName === 'DIV' && e.target.parentElement === mrt) {
+        const stationName = e.target.textContent;
+        searchInput.value = stationName;
+        search_attracion()
+      }
+    });
+
+  }
+
+    get_mrts();
+
+    // MRT 站點滾動功能+hover變色
+    const leftArrow = document.getElementById('leftArrow');
+    const rightArrow = document.getElementById('rightArrow');
+    const scrollAmount = 200; // 每次滾動的距離（像素）
+
+    //MRT 站點滾動功能
+    leftArrow.addEventListener('click', () => {
+      mrt.scrollBy({
+        left: -scrollAmount,
+        behavior: 'smooth'
+      });
+    });
+
+    rightArrow.addEventListener('click', () => {
+      mrt.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    });
+
+    //箭頭onmouserover變色
+    leftArrow.onmouseover = () => {
+      leftArrow.src = "/image/left_arrow_Hovered.png";
+    };
+
+    rightArrow.onmouseover = () => {
+      rightArrow.src = "/image/right_arrow_Hovered.png";
+    };
+
+
+    //箭頭onmouseout恢復顏色
+    leftArrow.onmouseout = () => {
+      leftArrow.src = "/image/left_arrow.png";
+    };
+
+    rightArrow.onmouseout = () => {
+      rightArrow.src = "/image/right_arrow.png";
+    };
+
+
+    //一進首頁就先取得第一頁的景點資料，並顯示每個景點的第一張圖片
+    const attraction_card = document.getElementById('attraction_card');
+    let currentPage = 0;
+    let isLoading = false; // 初始狀態：沒有在載入
+    let nextPageNum = null; // 追蹤下一頁的頁碼
+    let observer = null; // IntersectionObserver 實例，提升到外層方便管理
+
+    
+    async function get_attractions(page,category,keyword) {
+      // 步驟 1：檢查是否正在載入
+      if (isLoading) return; //若為 true，立即結束函數執行（return）
+      
+      // 步驟 2：設定載入狀態為 true
+      isLoading = true;
+      
+      // 步驟 3：判斷傳入的參數決定怎麼執行 API 請求
+      let response;
+
+      if (!keyword && !category){
+        response = await fetch (`/api/attractions?page=${page}`);
+        console.log("!keyword && !category")
+      }else if (keyword && category){
+        response = await fetch (`/api/attractions?page=${page}&keyword=${keyword}&category=${category}`);
+        console.log("keyword && categoryy")
+      }else if (keyword){
+        response = await fetch (`/api/attractions?page=${page}&keyword=${keyword}`)
+        console.log("keyword")
+      }else if (category){
+        response = await fetch (`/api/attractions?page=${page}&category=${category}`)
+        console.log("category")        
+      }
+
+      let result = await response.json()
+      
+      // 步驟 4：將取得的景點圖片依序插入
+      let noData = document.getElementById('noData');
+      noData.innerText = '';
+      if (result.data.length ===0){
+        let noData = document.getElementById('noData');
+        noData.innerText = '查無資料';
+      }
+      
+      
+      result.data.forEach(attraction =>{
+      const card = document.createElement('div');
+      card.className = 'attraction-item';
+      
+      const name = document.createElement('p');
+      const img = document.createElement('img');
+      const description = document.createElement('div');
+      const mrt = document.createElement('p');
+      const category = document.createElement('p');
+      
+      mrt.textContent = attraction.mrt;
+      category.textContent = attraction.category;
+
+      name.textContent = attraction.name;
+      name.className = 'name';
+      img.src = attraction.images[0];
+      card.appendChild(img);
+      card.appendChild(name);
+      
+      description.className = 'description';
+      description.appendChild(mrt);
+      description.appendChild(category);
+      card.appendChild(description);
+
+      attraction_card.appendChild(card);
+      
+    });
+
+    // 步驟 5：載入完成，設定為 false
+    isLoading = false;
+    nextPageNum = result.nextPage; // 更新下一頁頁碼
+    return result.nextPage;
+    }
+
+    
+    // 載入第一頁景點圖片，並追蹤拉到底部時，自動載入下一頁的圖片
+    async function loading_image(category,keyword){    
+      // 如果已經有 observer，先取消觀察
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+      
+      // 重置 nextPageNum（搜尋時需要重置）
+      nextPageNum = null;
+      
+      await get_attractions(0,category,keyword);
+      
+      // 第一頁載入完成後，設定觀察者
+      const target = document.querySelector("#sentinel");
+      
+      if (!target) return;
+      
+      // 建立一個 IntersectionObserver 
+      observer = new IntersectionObserver((entries) => { 
+        entries.forEach(entry => { 
+          // 簡化條件：只要元素進入視窗且可見比例足夠，就載入下一頁
+          if (entry.isIntersecting && entry.intersectionRatio > 0 && !isLoading && nextPageNum !== null) {
+            console.log("目標元素進入視窗！載入第 " + nextPageNum + " 頁"); 
+            get_attractions(nextPageNum, category, keyword);
+          }
+        }); 
+      }, {
+        root: null,
+        rootMargin: '100px', // 提前載入
+        threshold: [0, 0.1, 0.5, 1.0] // 使用多個 threshold，增加觸發機會
+      }); 
+      
+      // 開始觀察
+      observer.observe(target);
+    }
+    
+    loading_image();  
+
+    async function search_attracion() {
+      attraction_card.innerHTML = '';
+      //搜尋景點 帶入keyword以及category(選填)(page自動帶入0)
+      let keyword = searchInput.value;
+      const category = toggleBtn.textContent.includes('全部分類') 
+      ? '' 
+      : toggleBtn.textContent.replace('▼','').trim();
+      console.log("category:"+category)
+      loading_image(category,keyword);
+    }
+
+
+  </script>
 </body>
 </html>

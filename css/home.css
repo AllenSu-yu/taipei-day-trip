@@ -1,0 +1,385 @@
+body {
+    margin: 0;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    height: 54px;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+footer {
+  position: relative;
+}
+
+footer >img {
+  height: 104px;
+  width: 100%;
+}
+
+footer > p {
+  position: absolute;  /* 絕對定位 */
+  bottom: 41px;          /* 對齊底部 */
+  left: 0;            /* 對齊左側 */
+  right: 0;           /* 對齊右側 */
+  text-align: center;
+  margin: 0;
+  color: white;      /* 文字顏色 */
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.home__header {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 34px;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+    /* border: 1px solid #c70f3d; */
+}
+
+.home__header__title {
+    font-size: 30px;
+    font-weight: 700;
+    color:#448899;
+    padding-left: 10px;
+    white-space: nowrap;
+    /* border: 1px solid #c70f3d; */
+}
+
+
+.home__header__button {
+    display: flex;
+    font-weight: 500;
+    color: #666666;
+    padding-right: 10px;
+}
+
+.home__header__button >div {
+    margin:10px;
+}
+
+
+.banner {
+    background-image: url("/image/desktop_hero_section.png");
+    background-size: cover;   /* 圖片隨容器縮放 */
+    height: 320px;            /* 區塊高度 */
+    margin: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+.banner__content {
+    display: flex;
+    flex-direction: column; 
+    width: 100%;
+    max-width: 1200px;
+    height: 149px;
+    /* border: 10px solid #1e011e;     */
+}
+
+
+.banner__text {
+    display: flex;
+    flex-direction: column; /* 垂直排列 h1 和 h2 */
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+    height: 90px;
+    margin-bottom: 25px;
+    /* border: 1px solid #2f08be; */
+}  
+
+
+.banner__text1 {
+    margin: 0px;
+    width: auto;
+    padding-left: 10px;
+    margin-bottom: 15px;
+    color: #FFFFFF;
+    white-space: nowrap;
+    font-size: 28px;
+    font-weight: 700;    
+    /* border: 1px solid #c70f3d; */
+}
+
+.banner__text2 {
+    margin: 0px;
+    width: auto;
+    padding-left: 10px;
+    color: #FFFFFF;
+    white-space: nowrap;
+    font-size: 16px;
+    font-weight: 700;
+    /* border: 1px solid #c70f3d; */
+}
+
+.search-container {
+    width: 100%;
+    max-width: 1200px;
+    min-height: 46px;
+    padding-left: 10px;
+    display: flex;
+    font-family: 'Noto Sans TC', sans-serif; 
+    box-sizing: border-box;
+    /* border: 1px solid #c70f3d; */
+}
+
+.category-toggle {
+  position: relative;
+}
+
+#toggleBtn {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 46px;
+  border-radius: 5px 0 0 5px;
+  border: none;
+  cursor: pointer;
+  background-color: #F5F5F5;
+  color: black;
+  width: 100px;
+}
+
+.category-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  box-shadow: 0 0 20px 6px rgba(0, 0, 0, 0.2);
+  padding: 0px;
+  margin: 0px;
+  margin-top: 5px;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 360px;
+  height: 160px;
+  /* border: 1px solid #c70f3d; */
+}
+
+.category-option {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: black;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+  width: 100px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-option:hover {
+  background-color: #F5F5F5;
+}
+
+.search-bar {
+  display: flex;
+  flex: 1; /* 讓 search-bar 佔據剩餘空間 */
+  min-width: 0; /* 允許 flex 項目縮小 */
+}
+
+#searchInput {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #757575;
+  height: 46px;
+  flex: 1; /* 讓 input 在 search-bar 中擴展 */
+  min-width: 0; /* 允許縮小 */
+  max-width: 300px; /* 限制最大寬度 */
+  box-sizing: border-box;
+  padding-left: 10px;
+  border: none;
+}
+
+#searchBtn {
+  height: 46px;
+  width: 60px;
+  margin: 0px;
+  padding: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #448899;
+  cursor: pointer;
+  border-radius: 0 5px 5px 0;
+  border: none;  /* 移除邊框 */
+}
+
+#searchBtn img {
+  object-fit: contain;
+}
+  
+#noData {
+ color: blue;
+}
+  
+.hidden {
+  display: none;
+}
+
+.mrt_container {
+  width: 100%;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.mrt_list {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden; /* 隱藏超出容器的部分 */
+  gap: 15px;
+  box-sizing: border-box; /* 確保 padding 包含在寬度內 */
+  /* border: 1px solid #c70f3d; */
+}
+
+
+
+#mrt {
+  flex: 1; /*中間區塊佔滿剩餘空間*/
+  min-width: 0; /* 確保 flex 子元素可以正確縮小 */
+  display: flex; /* MRT 站點橫向排列 */ 
+  flex-wrap: nowrap; /* 確保站點不換行，保持橫向排列 */
+  gap: 15px; /* 站點間距 */ 
+  overflow-x: auto; /* 改為 auto 以支援滾動 */
+  scroll-behavior: smooth; /* 平滑滾動 */
+  scrollbar-width: none; /* Firefox 隱藏滾動條 */
+  -ms-overflow-style: none; /* IE/Edge 隱藏滾動條 */
+}
+
+
+
+#mrt >div {
+  flex-shrink: 0; /* 站點不會被壓縮 */
+  height: 24px;
+  white-space: nowrap;
+  color: #666666;
+  font-weight: 500;
+}
+
+
+
+.attraction_container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+
+#attraction_card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 10px;
+  max-width: 1200px;
+  width: 100%;
+  gap: 30px;
+  box-sizing: border-box; /* 確保 padding 包含在寬度內 */
+}
+
+
+#attraction_card > img{
+  width: 100%;
+  height: 197px;
+  object-fit: cover;
+}
+
+
+.attraction-item {
+  position: relative; /* 讓子元素可以絕對定位 */
+  width: 100%;
+  min-height: 242px; /* 圖片高度 197px + description 高度 45px */
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px 5px 5px 5px;
+  border: 1px solid #E8E8E8;
+}
+
+#attraction_card > .attraction-item > img {
+  width: 100%;
+  height: 197px;
+  object-fit: cover;
+  display: block; /* 移除圖片下方的間隙 */
+  flex-shrink: 0; /* 防止圖片被壓縮 */
+  border-radius: 5px 5px 0 0;
+}
+
+.name {
+  position: absolute;  /* 絕對定位 */
+  bottom: 45px;          /* 對齊底部 */
+  left: 0;            /* 對齊左側 */
+  right: 0;           /* 對齊右側 */
+  margin: 0;
+  padding: 10px;     /* 文字內距 */
+  color: white;      /* 文字顏色 */
+  background: rgba(0, 0, 0, 0.5);  /* 半透明背景，提高文字可讀性 */
+  box-sizing: border-box;  /* 確保padding不會增加寬度 */
+  text-align:left;  /* 文字置中 */
+  z-index: 1; /* 確保文字在圖片上方 */
+  white-space: nowrap; /* 防止文字換行 */
+  overflow: hidden; /* 隱藏超出部分 */
+  text-overflow: ellipsis; /* 超出時顯示省略號 */
+}
+
+.description {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 45px;
+  padding-left: 10px;
+  padding-right:10px;
+  color: #757575;
+  font-weight: 500;
+  /* border: 1px solid #c70f3d; */
+}
+
+
+/* 平板尺寸（1200px 以下）：3 列 */
+@media (max-width: 1200px) {
+  #attraction_card {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+  }
+
+  #attraction_card > img{
+    width: 100%;
+    height: 235px;
+    object-fit: cover;
+  }
+  
+}
+
+/* 手機尺寸（500px 以下）：1 列 */
+@media (max-width: 500px) {
+  #attraction_card {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 15px;
+    width: 100%;
+  }
+  #attraction_card > img{
+    width: 100%;
+    min-width: 330px;
+    height: 235px;
+    object-fit: cover;
+  }
+}
+
+
