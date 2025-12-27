@@ -1,0 +1,484 @@
+body {
+    margin: 0;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    height: 54px;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+footer {
+  position: relative;
+}
+
+footer >img {
+  height: 104px;
+  width: 100%;
+}
+
+footer > p {
+  position: absolute;  /* 絕對定位 */
+  bottom: 41px;          /* 對齊底部 */
+  left: 0;            /* 對齊左側 */
+  right: 0;           /* 對齊右側 */
+  text-align: center;
+  margin: 0;
+  color: white;      /* 文字顏色 */
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.home__header {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 34px;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+    /* border: 1px solid #c70f3d; */
+}
+
+.home__header__title {
+    font-size: 30px;
+    font-weight: 700;
+    color:#448899;
+    padding-left: 10px;
+    white-space: nowrap;
+    cursor: pointer;
+    /* border: 1px solid #c70f3d; */
+}
+
+
+.home__header__button {
+    display: flex;
+    font-weight: 500;
+    color: #666666;
+    padding-right: 10px;
+}
+
+.home__header__button >div {
+    margin:10px;
+}
+
+.attraction__container {
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.attraction_area {
+    max-width: 1200px;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    gap: 20px;        /* 元素間距 */
+}
+
+.attraction__imgs {
+    position: relative;
+    flex: 1 1 540px;  /* 可以縮小，但最小 540px */
+    min-width: 0;     /* 允許 flex 縮小 */
+    margin-left: 15px;
+}
+
+.attraction__img {
+    max-width: 540px;
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 5px 5px 5px 5px;
+    position: relative;
+}
+
+.indicator_container {
+    height: 5px;
+    max-width: 540px;
+    width: 100%;
+    display: flex;
+    position: absolute;
+    bottom: 0px;          /* 對齊底部 */
+    left: 0px;            
+    right: 0px;          
+}
+
+.indicator.active {
+    background-color: black;
+    height: 5px;
+    width: 100%;
+}
+
+.indicator.first {
+    background-color: rgba(255, 255, 255, 0.569);
+    height: 5px;
+    width: 100%;
+    border-radius: 0 0 0 5px;
+}
+
+.indicator.first.active {
+    background-color: black;
+    height: 5px;
+    width: 100%;
+    border-radius: 0 0 0 5px;
+}
+
+.indicator.active.last {
+    background-color: black;
+    height: 5px;
+    width: 100%;
+    border-radius: 0 0 5px 0;
+}
+
+.indicator {
+    background-color: rgba(255, 255, 255, 0.569);
+    height: 5px;
+    width: 100%;
+}
+
+.indicator.last {
+    background-color: rgba(255, 255, 255, 0.569);;
+    height: 5px;
+    width: 100%;
+    border-radius: 0 0 5px 0;
+}
+  
+.img_arrow {
+    width: 100%;
+}
+
+#leftArrow {
+    position: absolute;  /* 絕對定位 */
+    top: 50%;              /* 垂直居中 */
+    transform: translateY(-50%);
+    left: 10px;              
+    margin: 0;
+    padding: 0px;     /* 文字內距 */
+    width: 36px;
+    height: 36px;
+    box-sizing: border-box;  /* 確保padding不會增加寬度 */
+}
+
+#rightArrow {
+    position: absolute;  /* 絕對定位 */
+    top: 50%;              /* 垂直居中 */
+    transform: translateY(-50%);
+    right: 10px;          
+    margin: 0;
+    padding: 0px;     /* 文字內距 */
+    width: 36px;
+    height: 36px;
+    box-sizing: border-box;  /* 確保padding不會增加寬度 */
+}
+
+.booking__area {
+    flex: 1 1 600px;  /* 可以縮小，但最小 600px */
+    min-width: 0;
+    margin-left: 10px;
+}
+
+.booking__area__name {
+    font-weight: 700;
+    font-size: 24px;
+    color: #666666;
+    margin-bottom: 15px;
+}
+
+.booking__area__category {
+    font-weight: 400;
+    font-size: 16px;
+    color: #666666;
+    margin-bottom: 20px;
+}
+
+.booking__box {
+    background-color: #E8E8E8;
+    width: 100%;      /* 改為 100%，讓它適應父容器 */
+    max-width: 600px; /* 設定最大寬度 */
+    height: 302px;
+    border-radius: 5px 5px 5px 5px;
+}
+
+.booking__box__title {
+    font-weight: 700;
+    font-size: 16px;
+    color: #666666;
+    padding-top: 15px;
+    padding-left: 20px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+.booking__box__text {
+    font-weight: 400;
+    font-size: 16px;
+    color: #666666;
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.booking__box__form {
+    padding-left: 20px;
+    font-weight: 700;
+    font-size: 16px;
+    color: #666666;
+}
+
+#select_date {
+    border: 0;
+    width: 193px;
+    height: 35px;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-sizing: border-box;
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 15px;
+    margin-left: 5px;
+
+    /* 添加自定義日曆圖標作為背景 */
+    background-image: url('/image/calendar.png');
+    background-repeat: no-repeat;
+    background-position: calc(100% - 10px) center;
+    background-size: 24px 24px;
+}
+
+
+/* Chrome/Safari 專用：隱藏原生日曆圖標 */
+#select_date::-webkit-calendar-picker-indicator {
+    opacity: 0;
+}
+
+/* Firefox 專用：隱藏原生日曆圖標 */
+#select_date::-moz-calendar-picker-indicator {
+    opacity: 0;
+}
+
+
+.select_time {
+    margin-bottom: 15px;
+}
+
+/* 確保 label 和 radio button 對齊 */
+.forenoon, .afternoon {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    margin-right: 15px;
+    margin-left:5px;
+    cursor: pointer;
+}
+
+
+/* 控制 radio button 的基本樣式 */
+input[type="radio"] {
+    /* 移除預設樣式 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    /* 控制大小 */
+    width: 22px;
+    height: 22px;
+    
+    /* 控制顏色和邊框 */
+    /* border: 4px solid #666666; */
+    border-radius: 50%;
+    background-color: white;
+    
+    /* 垂直對齊 */
+    vertical-align: middle;
+    margin: 4px;
+    cursor: pointer;
+}
+
+/* 選中狀態的樣式 */
+input[type="radio"]:checked {
+    background-color: #448899;
+    /* 可以添加內圈效果 */
+    box-shadow: inset 0 0 0 2px white;
+}
+
+.tourguide_Fee {
+    display: flex;
+}
+
+.cost {
+    font-weight: 400;
+    font-size: 16px;
+    color: #666666;
+    margin-left: 7px;
+    margin-bottom: 25px;
+}
+
+.booking_button {
+    border-radius: 5px 5px 5px 5px;
+    border: 0px;
+    background-color: #448899;
+    color: white;
+    font-size: 19px;
+    width: 154px;
+    height: 36px;
+}
+
+
+hr {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    max-width: 1200px;
+    color: #E8E8E8;
+}
+
+
+.information_container {
+    height: 362px;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.information {
+    max-width:1200px;
+    width: 100%;
+    font-weight: 400;
+    font-size: 16px;
+    color: #666666;
+}
+
+.information__description{
+    max-width: 1180px;
+    height: 96px;
+    margin: 10px;
+    margin-bottom: 40px;
+    box-sizing: border-box;
+}
+
+.information__adress {
+    width: 1180px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 20px;
+}
+
+.information__adress__title {
+    font-weight: 700;
+    height: 32px;
+}
+
+.information__trasport {
+    max-width: 1180px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.information__trasport__title {
+    font-weight: 700;
+    height: 32px;
+    max-width: 1180px;
+}
+
+.information__trasport__content {
+    max-width: 1180px;
+}
+
+/* 小螢幕時改為垂直排列 */
+@media (max-width: 900px) {
+    .information_container {
+        height: auto;
+    }
+
+    .information {
+        height: auto;
+        flex: none;
+        margin-bottom: 134px;
+    }
+
+
+    .information__description{
+        height: auto;
+        margin-bottom: 20px;
+    }
+}
+
+
+/* 小螢幕時改為垂直排列 */
+@media (max-width: 500px) {
+    .home__header__title {
+        padding-left: 10px;
+        padding-right: 10px;
+        /* border: 1px solid #c70f3d; */
+    }
+
+
+    .attraction__container {
+        height: auto;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin-top: 10px;
+        /* border: 1px solid #c70f3d; */
+    }
+    
+    .attraction_area {
+        width: 360px;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;        /* 元素間距 */
+    }
+    
+    .attraction__imgs {
+        position: relative;
+        width: 360px;
+        height: 350px;
+        flex: none;  /* 移除 flex 屬性，讓固定高度生效 */
+        margin-left: 0;  /* 移除左邊距，讓它與父容器對齊 */
+    }
+    
+    .attraction__img {
+        width: 360px;
+        height: 350px;
+        object-fit: cover;
+        border-radius: 5px 5px 5px 5px;
+        position: relative;
+    }
+
+    .booking__area {
+        margin-left: 0px;
+        padding-left: 10px;
+        padding-right: 10px;
+        height: 390px;
+        flex: none;   
+    }
+
+    .booking__box__text {
+        padding-right: 20px;
+    }
+
+
+    hr {
+        max-width: 340px;
+        color: #E8E8E8;
+    }
+
+    .information_container {
+        height: auto;
+    }
+
+    .information {
+        width: 340px;
+        height: auto;
+        flex: none;
+        margin-bottom: 134px;
+    }
+
+
+    .information__description{
+        height: auto;
+        margin-bottom: 20px;
+    }
+}
