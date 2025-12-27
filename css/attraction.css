@@ -16,7 +16,7 @@ footer {
 
 footer >img {
   height: 104px;
-  width: 100%;
+  width: 1920px;
 }
 
 footer > p {
@@ -335,7 +335,7 @@ hr {
 
 
 .information_container {
-    height: 362px;
+    height: auto;
     margin-bottom: 40px;
     display: flex;
     justify-content: center;
@@ -351,7 +351,7 @@ hr {
 
 .information__description{
     max-width: 1180px;
-    height: 96px;
+    height: auto;
     margin: 10px;
     margin-bottom: 40px;
     box-sizing: border-box;
@@ -383,6 +383,7 @@ hr {
 
 .information__trasport__content {
     max-width: 1180px;
+    height: auto;
 }
 
 /* 小螢幕時改為垂直排列 */
@@ -407,6 +408,22 @@ hr {
 
 /* 小螢幕時改為垂直排列 */
 @media (max-width: 500px) {
+    footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    footer img {
+        width: 360px;
+        min-width: 360px;
+        height: 104px;
+    }
+
+    .home__header {
+        width: 360px;
+    }
+
     .home__header__title {
         padding-left: 10px;
         padding-right: 10px;
@@ -473,12 +490,10 @@ hr {
         width: 340px;
         height: auto;
         flex: none;
-        margin-bottom: 134px;
     }
 
 
     .information__description{
         height: auto;
-        margin-bottom: 20px;
     }
 }
