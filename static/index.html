@@ -128,20 +128,20 @@
     });
 
     //獲取MRT後插入到頁面
-    async function get_mrts(params) {
+    async function get_mrts() {
       let response = await fetch ("/api/mrts", {
         method: "GET"
       });
-      let result = await response.json()
+      let result = await response.json();
       
-      result.data.forEach(mrts =>{
-      const mrt_list = document.createElement('div');
-      mrt_list.textContent = mrts;
-      mrt.appendChild(mrt_list);
-      
-    });
-  
-    // 使用事件委派，統一處理所有 MRT 站點的 hover 效果（放在 forEach 外面）
+      result.data.forEach(mrts => {
+        const mrt_list = document.createElement('div');
+        mrt_list.textContent = mrts;
+        mrt.appendChild(mrt_list);
+      });
+    }
+
+    // 使用事件委派，統一處理所有 MRT 站點的 hover 效果（放在函數外面，只執行一次）
     mrt.addEventListener('mouseover', (e) => {
       if (e.target.tagName === 'DIV' && e.target.parentElement === mrt) {
         e.target.style.color = '#000000'; // hover 時的顏色
@@ -162,8 +162,6 @@
         search_attracion()
       }
     });
-
-  }
 
     get_mrts();
 
@@ -253,6 +251,14 @@
       result.data.forEach(attraction =>{
       const card = document.createElement('div');
       card.className = 'attraction-item';
+
+      // 添加點擊事件，點擊整個卡片都能觸發
+      card.addEventListener('click', () => {
+        window.location.href = `/attraction/${attraction.id}`;
+      });
+      
+      // 添加 cursor 樣式，讓用戶知道可以點擊
+      card.style.cursor = 'pointer';
       
       const name = document.createElement('p');
       const img = document.createElement('img');

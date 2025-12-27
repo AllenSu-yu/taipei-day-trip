@@ -205,6 +205,11 @@ footer > p {
   border: none;
 }
 
+#searchInput:focus {
+  outline: none;
+}
+
+
 #searchBtn {
   height: 46px;
   width: 60px;
