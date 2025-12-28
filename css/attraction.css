@@ -8,6 +8,8 @@ header {
     justify-content: center;
     height: 54px;
     font-family: 'Noto Sans TC', sans-serif;
+    max-width: 1920px;
+    /* border-bottom: 1px solid #c70f3d; */
 }
 
 footer {
@@ -46,7 +48,7 @@ footer > p {
     font-size: 30px;
     font-weight: 700;
     color:#448899;
-    padding-left: 10px;
+    padding: 10px;
     white-space: nowrap;
     cursor: pointer;
     /* border: 1px solid #c70f3d; */
@@ -63,6 +65,18 @@ footer > p {
 .home__header__button >div {
     margin:10px;
 }
+
+.header__hr {
+    border: none;              /* 移除預設邊框 */
+    border-top: 1px solid #E8E8E8;  /* 或使用 border-top 來顯示線條 */
+    height: 0;                 /* hr 的高度應該為 0，用 border 來顯示 */
+    max-width: 1920px;
+    width: 100%;               /* 確保寬度填滿 */
+    margin: 0;                 /* 移除預設 margin */
+    margin-top: 5px;
+}
+
+
 
 .attraction__container {
     height: 400px;
@@ -179,6 +193,7 @@ footer > p {
     flex: 1 1 600px;  /* 可以縮小，但最小 600px */
     min-width: 0;
     margin-left: 10px;
+    margin-right: 15px;
 }
 
 .booking__area__name {
@@ -219,6 +234,9 @@ footer > p {
     color: #666666;
     padding-left: 20px;
     margin-bottom: 15px;
+    white-space: nowrap;        /* 不換行 */
+    overflow: hidden;           /* 隱藏超出部分 */
+    text-overflow: ellipsis;    /* 顯示刪節號 */
 }
 
 .booking__box__form {
@@ -239,6 +257,8 @@ footer > p {
     font-weight: 400;
     margin-bottom: 15px;
     margin-left: 5px;
+    
+    
 
     /* 添加自定義日曆圖標作為背景 */
     background-image: url('/image/calendar.png');
@@ -326,13 +346,17 @@ input[type="radio"]:checked {
 }
 
 
-hr {
+
+.information__hr {
+    border: none;              /* 移除預設邊框 */
+    border-top: 1px solid #E8E8E8;  /* 或使用 border-top 來顯示線條 */
+    height: 0;                 /* hr 的高度應該為 0，用 border 來顯示 */
+    max-width: 1200px;
+    width: 100%;               /* 確保寬度填滿 */
     margin-top: 40px;
     margin-bottom: 40px;
-    max-width: 1200px;
-    color: #E8E8E8;
+    max-width: 1200px;                
 }
-
 
 .information_container {
     height: auto;
@@ -478,7 +502,9 @@ hr {
 
 
     hr {
-        max-width: 340px;
+        margin-left: 10px;
+        max-width: 1200px;
+        width: calc(100% - 10px);
         color: #E8E8E8;
     }
 
@@ -495,5 +521,6 @@ hr {
 
     .information__description{
         height: auto;
+        /* margin-bottom: 20px; */
     }
 }
