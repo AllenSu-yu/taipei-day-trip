@@ -9,6 +9,7 @@ header {
     height: 54px;
     font-family: 'Noto Sans TC', sans-serif;
     max-width: 1920px;
+    width: 100%;
     /* border-bottom: 1px solid #c70f3d; */
 }
 
@@ -18,7 +19,8 @@ footer {
 
 footer >img {
   height: 104px;
-  width: 1920px;
+  max-width: 1920px;
+  width: 100%;
 }
 
 footer > p {
@@ -363,6 +365,7 @@ input[type="radio"]:checked {
     margin-bottom: 40px;
     display: flex;
     justify-content: center;
+    padding: 10px;
 }
 
 .information {
@@ -371,32 +374,36 @@ input[type="radio"]:checked {
     font-weight: 400;
     font-size: 16px;
     color: #666666;
+    /* padding: 0 10px; */
 }
 
 .information__description{
     max-width: 1180px;
+    width: 100%;
     height: auto;
-    margin: 10px;
     margin-bottom: 40px;
     box-sizing: border-box;
 }
 
 .information__adress {
-    width: 1180px;
-    margin-left: 10px;
-    margin-right: 10px;
+    max-width: 1180px;
+    width: 100%;
     margin-bottom: 20px;
 }
 
 .information__adress__title {
     font-weight: 700;
     height: 32px;
+    width: 100%;
+}
+
+.information__adress__content {
+    width: 100%;
 }
 
 .information__trasport {
     max-width: 1180px;
-    margin-left: 10px;
-    margin-right: 10px;
+    width: 100%;
 }
 
 .information__trasport__title {
@@ -410,7 +417,7 @@ input[type="radio"]:checked {
     height: auto;
 }
 
-/* 小螢幕時改為垂直排列 */
+/* 平板螢幕時改為垂直排列 */
 @media (max-width: 900px) {
     .information_container {
         height: auto;
@@ -490,6 +497,7 @@ input[type="radio"]:checked {
 
     .booking__area {
         margin-left: 0px;
+        margin-right: 0px;
         padding-left: 10px;
         padding-right: 10px;
         height: 390px;
@@ -498,14 +506,12 @@ input[type="radio"]:checked {
 
     .booking__box__text {
         padding-right: 20px;
+        white-space: normal;
     }
 
 
-    hr {
-        margin-left: 10px;
-        max-width: 1200px;
-        width: calc(100% - 10px);
-        color: #E8E8E8;
+    .information__hr {
+        width: 340px;
     }
 
     .information_container {
