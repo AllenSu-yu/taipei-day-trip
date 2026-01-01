@@ -3,9 +3,202 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attraction</title>
+  <title>台北一日遊</title>
+  <link rel="stylesheet" href="/css/attraction.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  
+  <header>
+    <div class="home__header">
+      <div class="home__header__title" onclick="homepage()">台北一日遊 </div>
+      <div class="home__header__button">
+        <div>預定行程</div>
+        <div>登入/註冊</div>
+      </div>
+    </div>
+  </header>
+
+  <hr class="header__hr">
+
+  <div class="attraction__container">
+    <div class="attraction_area">
+      <div class="attraction__imgs">
+        <img src="" alt="image" class="attraction__img">
+        <div class="img_arrow">
+          <img id="leftArrow" src="/image/left_arrow.png" alt="←" style="cursor: pointer;" onclick="left_image()">
+          <img id="rightArrow" src="/image/right_arrow.png" alt="→" style="cursor: pointer;" onclick="right_image()">
+        </div>
+      </div>
+      <div class="booking__area">
+        <div class="booking__area__name">booking__area__name</div>
+        <div class="booking__area__category">booking__area__category</div>
+        <div class="booking__box">
+          <div class="booking__box__title">訂購導覽行程</div>
+          <div class="booking__box__text">以此景點為中心的一日行程，帶您探索城市角落故事</div>
+          <div class="booking__box__form">
+            <form action="" method="post">
+              <div>
+                <label for="select_date">選擇日期：</label> <input type="date" name="select_date" id="select_date"> <br>
+              </div>
+              <div class="select_time">
+                <span>選擇時間：</span>
+                <label for="forenoon" class="forenoon" onclick="forenoonCost()"> 
+                  <input type="radio" name="booking_time" value="forenoon" checked id="forenoon" onclick="forenoonCost()">上半天
+                </label>
+                <label for="afternoon" class="afternoon" onclick="afternoonCost()">
+                  <input type="radio" name="booking_time" value="afternoon" id="afternoon" onclick="afternoonCost()">下半天
+                </label>
+              </div>
+              <div class="tourguide_Fee">
+                <div>導覽費用：</div><div class="cost">新台幣 2000 元</div>
+              </div>
+              <button type="submit" class="booking_button">開始預約行程</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <hr class="information__hr">
+
+
+
+  <div class="information_container">
+    <div class="information">
+      <div class="information__description">information__description</div>
+      <div class="information__adress">
+        <div class="information__adress__title">景點地址：</div>
+        <div class="information__adress__content">information__adress__content</div>
+      </div>
+      <div class="information__trasport">
+        <div class="information__trasport__title">交通方式：</div>
+        <div class="information__trasport__content">information__trasport__content</div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <footer>
+    <img src="/image/footer_clean.png" alt="COPYRIGHT © 2021 台北一日遊">
+    <p>COPYRIGHT © 2021 台北一日遊</p>
+  </footer>
+
+  <script>
+    const attraction__img = document.querySelector('.attraction__img')
+    const booking__area__name = document.querySelector('.booking__area__name')
+    const booking__area__category = document.querySelector('.booking__area__category')
+    const information__description = document.querySelector('.information__description')
+    const information__adress__content = document.querySelector('.information__adress__content')
+    const information__trasport__content = document.querySelector('.information__trasport__content')
+
+    // 或者從 URL 路徑取得（例如：/attraction/1）
+    const attractionId = window.location.pathname.split('/').pop();
+    let image_num = 0;
+    let image_max_num;
+    let attraction_information;
+    async function get_attraction_byId(attractionId) {
+      let response = await fetch(`/api/attraction/${attractionId}`);
+      let result = await response.json();
+      attraction__img.src = result.data.images[0];
+      booking__area__name.innerHTML = result.data.name;
+      booking__area__category.innerHTML = result.data.category + " at " + result.data.mrt;
+      information__description.innerHTML = result.data.description;
+      information__adress__content.innerHTML = result.data.address;
+      information__trasport__content.innerHTML = result.data.transport ;
+      image_max_num = result.data.images.length -1;
+      attraction_information = result.data;
+      
+      const attraction__imgs = document.querySelector('.attraction__imgs');
+      const indicator_container_div = document.createElement('div');
+      indicator_container_div.className = 'indicator_container';
+
+
+      // 根據圖片數量生成 indicator（image_max_num + 1 是總數量）
+      for (let i = 0; i <= image_max_num; i++) {
+        const indicator = document.createElement('div');
+        indicator.className = 'indicator';
+        // 如果是第一張圖片，添加 active 類別
+        if (i === 0) {
+          indicator.classList.add('first', 'active');
+        }else if (i == image_max_num){
+          indicator.classList.add('last');
+        }
+        indicator_container_div.appendChild(indicator);
+      }
+
+
+      attraction__imgs.appendChild(indicator_container_div)
+
+   }; 
+
+    get_attraction_byId(attractionId);
+
+    function left_image() {
+      const indicators = document.querySelectorAll('.indicator')
+      const indicator_current = document.querySelector('.indicator.active');
+      if (indicator_current){
+        indicator_current.classList.remove('active');
+      }
+
+      if (image_num >0){
+        image_num -=1;
+        attraction__img.src = attraction_information.images[image_num];
+      }else{
+        attraction__img.src = attraction_information.images[image_max_num];
+        image_num = image_max_num
+      }
+
+      if (indicators[image_num]){
+        indicators[image_num].classList.add('active')
+      }
+
+      console.log(`當前圖片${image_num+1}/最大圖片數量${image_max_num+1}`)
+    };
+
+
+    function right_image() {
+      const indicators = document.querySelectorAll('.indicator');
+      const indicator_current = document.querySelector('.indicator.active');
+      if (indicator_current){
+        indicator_current.classList.remove('active');
+      }
+           
+      
+      if (image_num == image_max_num){
+        image_num =0;
+        attraction__img.src = attraction_information.images[image_num];
+      }else{
+        image_num +=1
+        attraction__img.src = attraction_information.images[image_num];
+      }
+
+      if (indicators[image_num]){
+        indicators[image_num].classList.add('active')
+      }
+
+
+      console.log(`當前圖片${image_num+1}/最大圖片數量${image_max_num+1}`)
+    };
+    
+    function afternoonCost(){
+      const cost = document.querySelector('.cost');
+      cost.innerHTML = '新台幣 2500 元'
+    }
+
+    function forenoonCost(){
+      const cost = document.querySelector('.cost');
+      cost.innerHTML = '新台幣 2000 元'
+    }
+
+    function homepage() {
+      window.location.href = '/';
+    }
+  </script>
+
 </body>
 </html>
