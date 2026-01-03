@@ -59,13 +59,19 @@ footer > p {
 
 .home__header__button {
     display: flex;
-    font-weight: 500;
-    color: #666666;
     padding-right: 10px;
 }
 
-.home__header__button >div {
+.home__header__button > .booking__btn, 
+.home__header__button > .login__btn {
+    border: none;           /* 移除預設邊框 */
+    background: none;       /* 移除預設背景 */  
     margin:10px;
+    font-weight: 500;
+    color: #666666;
+    font-size: 16px;    
+    cursor: pointer;        /* 顯示手型游標 */
+    padding: 0;             /* 移除預設 padding */
 }
 
 .header__hr {
@@ -78,7 +84,204 @@ footer > p {
     margin-top: 5px;
 }
 
-
+/* Modal 樣式 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: calc(54px + 160px);  /* header高度 + banner高度的一半，再減去modal-box高度的一半 */
+    z-index: 1000;
+  }
+  
+  /* 放在 .modal 之後，優先級更高 */
+  .modal.hidden {
+    display: none;
+  }
+  
+  /* 隱藏 modal-box */
+  .modal-box.hidden {
+    display: none;
+  }
+  
+  .modal-box.login {
+    position: relative;
+    background-color: white;
+    border-radius: 5px;
+    padding-top: 25px;
+    padding-bottom: 16px;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 340px;
+    height: 275px;
+    box-sizing: border-box;
+    margin-top: calc(-137.5px);  /* modal-box高度的一半，負值向上偏移 */
+    justify-items: center;
+  }
+  
+  .modal-box.login.enlarge {
+    position: relative;
+    background-color: white;
+    border-radius: 5px;
+    padding-top: 25px;
+    padding-bottom: 16px;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 340px;
+    height: 293px;
+    box-sizing: border-box;
+    margin-top: calc(-137.5px);  /* modal-box高度的一半，負值向上偏移 */
+    justify-items: center;
+  }
+  
+  .modal-box.signup {
+    position: relative;
+    background-color: white;
+    border-radius: 5px;
+    padding-top: 25px;
+    padding-bottom: 16px;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 340px;
+    height: 332px;
+    box-sizing: border-box;
+    margin-top: calc(-137.5px);  /* modal-box高度的一半，負值向上偏移 */
+    justify-items: center;
+  }
+  
+  .modal-box.signup.enlarge {
+    position: relative;
+    background-color: white;
+    border-radius: 5px;
+    padding-top: 25px;
+    padding-bottom: 16px;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 340px;
+    height: 350px;
+    box-sizing: border-box;
+    margin-top: calc(-137.5px);  /* modal-box高度的一半，負值向上偏移 */
+    justify-items: center;
+  }
+  
+  
+  
+  .modal-close {
+    position: absolute;
+    top: 27px;
+    right: 17px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #666666;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+  }
+  
+  .modal-close:hover {
+    color: #000000;
+  }
+  
+  .top_dress {
+    background: linear-gradient(0deg, #337788, #66AABB);
+    width: 340px;
+    height: 10px;
+    margin: -25px -15px 15px -15px;  /* 負 margin 抵消 padding，讓它延伸到邊緣 */
+    padding: 0px;
+    border-radius: 5px 5px 0 0;  /* 如果需要，讓頂部圓角與 modal-box 對齊 */
+  }
+  
+  .modal__title {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: #666666;
+    margin-bottom: 15px;
+    height: 27px;
+  }
+  
+  
+  .signupName {
+    width: 310px;
+    height: 47px;
+    box-sizing: border-box;
+    border-radius: 5px 5px 5px 5px;
+    border: 1px solid #CCCCCC;
+    padding-left: 15px;
+    padding-top: 16.5px;
+    padding-bottom: 16.5px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    font-size: 16px;
+    color: #757575;
+  }
+  
+  .loginUser,.signupUser {
+    width: 310px;
+    height: 47px;
+    box-sizing: border-box;
+    border-radius: 5px 5px 5px 5px;
+    border: 1px solid #CCCCCC;
+    padding-left: 15px;
+    padding-top: 16.5px;
+    padding-bottom: 16.5px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    font-size: 16px;
+    color: #757575;
+  }
+  
+  
+  .loginPass,.signupPass  {
+    width: 310px;
+    height: 47px;
+    box-sizing: border-box;
+    border-radius: 5px 5px 5px 5px;
+    border: 1px solid #CCCCCC;
+    padding-left: 15px;
+    padding-top: 16.5px;
+    padding-bottom: 16.5px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    font-size: 16px;
+    color: #757575;
+  }
+  
+  .loginSubmit, .signupSubmit {
+    width: 310px;
+    height: 46px;
+    box-sizing: border-box;
+    border-radius: 5px 5px 5px 5px;
+    border: 1px solid #CCCCCC;
+    background-color: #448899;
+    margin-bottom: 10px;
+    font-weight: 400;
+    font-size: 19px;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .signupResult,.loginResult {
+    margin: 0px;
+  }
+  
+  
+  .loginDescription, .signupDescription {
+    font-weight: 500;
+    font-size: 16px;
+    color: #666666;
+    cursor: pointer; 
+  }
 
 .attraction__container {
     height: 400px;
