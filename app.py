@@ -1,4 +1,3 @@
-from nt import error
 from fastapi import *
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles# 在 app = FastAPI() 之後加入
