@@ -1,0 +1,33 @@
+<!-- components/login-modal.html -->
+<div id="loginModal" class="modal hidden">
+    <div class="modal-box login" id="modal-login">
+        <div class="top_dress"></div>
+        <button class="modal-close" onclick="closeLogin()"><img src="/image/icon_close.png" alt=""></button>
+        <div class="modal__title">登入會員帳號</div>
+  
+        <input class="loginUser" placeholder="輸入電子信箱" />
+        <input class="loginPass" type="password" placeholder="輸入密碼" />
+
+        <button class="loginSubmit" onclick="submitLogin()">登入帳戶</button>
+        <p id="loginResult" class="loginResult hidden"></p>
+        <div class="loginDescription" onclick="openSignup()">還沒有帳戶？點此註冊</div>
+
+
+    </div>
+
+    <div class="modal-box signup hidden" id="modal-signup">
+        <div class="top_dress"></div>
+        <button class="modal-close" onclick="closeLogin()"><img src="/image/icon_close.png" alt=""></button>
+        <div class="modal__title">註冊會員帳號</div>
+
+        <input class="signupName" placeholder="輸入姓名" />
+        <input class="signupUser" placeholder="輸入電子信箱" />
+        <input class="signupPass" type="password" placeholder="輸入密碼" />
+
+        <button class="signupSubmit" onclick="submitSignup()">註冊新帳戶</button>
+        <p id="signupResult" class="signupResult hidden"></p>
+        <div class="signupDescription" onclick="reopenLogin()">已經有帳戶了？點此登入</div>
+
+    </div>
+</div>
+  
