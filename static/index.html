@@ -14,11 +14,24 @@
     <div class="home__header">
       <div class="home__header__title">台北一日遊 </div>
       <div class="home__header__button">
-        <div>預定行程</div>
-        <div>登入/註冊</div>
+        <button class="booking__btn">預定行程</button>
+        <button class="login__btn"  onclick="openLogin()">登入/註冊</button>
       </div>
     </div>
   </header>
+
+  <script>
+    fetch("/components/login-modal.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("login-modal-container").innerHTML = html;
+      });
+  </script>
+
+  <script src="/js/modal.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>check_auth();</script>
+
   <div class="banner">
     <div class="banner__content">
       <div class="banner__text">
@@ -38,6 +51,7 @@
           <button id="searchBtn" onclick="search_attracion()"><img src="/image/search.png" alt="搜尋"></button>
         </div>
       </div>
+      <div id="login-modal-container"></div>
     </div>
   </div>
 
