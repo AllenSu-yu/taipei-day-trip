@@ -83,11 +83,15 @@ async function submitLogin() {
 async function check_auth() {
     const login__btn = document.querySelector(".login__btn")
 
-    // 如果沒有 token，直接設定為登入狀態
+    // 如果沒有 token，直接設定為未登入狀態
     const token = localStorage.getItem('token');
     if (!token) {
         login__btn.textContent = "登入/註冊";
-      return;
+        // 檢查當前 URL，如果是 /booking 就轉導回首頁
+        if (window.location.pathname === '/booking') {
+            window.location.href = '/';
+        }
+        return;
     }
 
     let response = await fetch("/api/user/auth",{
@@ -101,10 +105,16 @@ async function check_auth() {
     if (result.data){
       login__btn.textContent = "登出系統";
       login__btn.setAttribute('onclick', 'clearToken()');
+      return result.data; // 返回用戶資訊
     }
-    else if (result.data == null) {
+    else {
+      clearToken()
       login__btn.textContent = "登入/註冊";
       login__btn.setAttribute('onclick', 'openLogin()');
+      // 檢查當前 URL，如果是 /booking 就轉導回首頁
+      if (window.location.pathname === '/booking') {
+        window.location.href = '/';
+      }
     }
   }
 
