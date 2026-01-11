@@ -4,8 +4,112 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Booking</title>
+  <link rel="stylesheet" href="/css/booking.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <header>
+    <div class="home__header">
+      <div class="home__header__title" onclick="homepage()">台北一日遊 </div>
+      <div class="home__header__button">
+        <button class="booking__btn" onclick="goto_bookingtrip()">預定行程</button>
+        <button class="login__btn"  onclick="openLogin()">登入/註冊</button>
+      </div>
+    </div>
+  </header>
+
+  <script src="/js/modal.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/bookingtrip.js"></script>
+  <script>
+    (async () => {
+      const userData = await check_auth();
+      if (userData) {
+        await get_bookingtrip(userData);
+      }
+    })();
+  </script>
   
+  <hr class="header__hr">
+  <div id="booking_trip_exist" class="">
+    <div class="attraction__container">
+      <div class="welcome"> </div>
+      <div class="booking_information_area"> 
+        <div class="booking_img"> </div>
+        <div class="booking_information">
+          <div class="booking_title_container">
+            <div class="booking_title">台北一日遊：{} </div>
+            <img src="/image/delete.png" alt="" id="desktop_delete" onclick="delete_bookingtrip()">
+          </div>
+          <div class="booking_detail">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider__hr">
+
+    <div class="contact__container">
+      <div class="contact_information">
+        <div class="contact_information_title">您的聯絡資訊</div>
+        <div class="contact_information-style">
+          <div>聯絡姓名：<input type="text" class="contact_information_input"></div>
+          <div>聯絡信箱：<input type="text" class="contact_information_input"></div>
+          <div>手機號碼：<input type="text" class="contact_information_input"></div>
+          <div>請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider__hr">
+
+    <div class="payment_container">
+      <div class="payment_information">
+        <div class="payment_information_title">信用卡付款資訊</div>
+        <div class="payment_information-style">
+          <div>卡片號碼：<input type="password" class="payment_information_input"></div>
+          <div>過期時間：<input type="text" class="payment_information_input"></div>
+          <div>驗證密碼：<input type="text" class="payment_information_input"></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider__hr">
+
+    <div class="summary_container">
+      <div class="summary_information">
+        <div class="summary_information_cost">總價：新台幣{}元</div>
+        <button class="summary_information_submit">確認訂購並付款</button>
+      </div>
+    </div>
+  
+    <footer>
+      <img src="/image/footer_clean.png" alt="COPYRIGHT © 2021 台北一日遊">
+      <p>COPYRIGHT © 2021 台北一日遊</p>
+    </footer>
+  </div>
+
+  <div id="booking_trip_none" class="">
+    <div class="attraction__container">
+      <div class="welcome"> 您好，{}，待預定的行程如下： </div>
+      <div class="booking_trip_none"> 
+        目前沒有任何待預訂的行程
+      </div>
+
+      <footer>
+        <img src="/image/footer_clean.png" alt="COPYRIGHT © 2021 台北一日遊">
+        <p>COPYRIGHT © 2021 台北一日遊</p>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    function homepage() {
+      window.location.href = '/';
+    }
+  </script>
+
 </body>
 </html>

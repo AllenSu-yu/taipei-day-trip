@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 import datetime
 import jwt
 from jwt.exceptions import InvalidTokenError
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, Literal
 
 load_dotenv()  # 載入 .env 檔案
 app=FastAPI()
@@ -420,6 +421,164 @@ async def check_auth(authorization: str = Header(None, alias="Authorization")):
 		}
 	return {"data": None} 
 
+#取得尚未確認下單的預定行程
+@app.get("/api/booking")
+async def get_bookingtrip(authorization:str = Header(None, alias="Authorization")):
+	#確認是否有登入的token
+	if not authorization:
+		return {
+			"error":True,
+			"message":"尚未登入"
+		}
+	#驗證token是否正確
+	user_info = verify_token(authorization)
+	if not user_info:
+		return {"error": True, "message": "未授權"}
+
+	conn = None
+	cursor = None
+	try: 
+		conn = get_connection()
+		cursor = conn.cursor()
+		member_id = user_info.get("id")		
+		#搜尋booking_trip表格，確認是否有status = process的待預定行程
+		sql = "SELECT booking_trip_attractionid, booking_trip_date, booking_trip_time, booking_trip_price FROM booking_trip WHERE booking_trip_validflag= 1 AND booking_trip_status='process' AND booking_trip_memberid=%s"
+		cursor.execute(sql, (member_id,))
+		result = cursor.fetchone()
+		if result:
+			booking_trip_attractionid = result[0]
+			booking_trip_date = result[1]
+			booking_trip_time = result[2]
+			booking_trip_price = result[3]
+			sql = "SELECT attraction.attraction_id, attraction.name, attraction.address, image.file FROM attraction JOIN image ON attraction.attraction_id = image.attraction_id WHERE attraction.attraction_id=%s ORDER BY attraction.attraction_id ASC LIMIT 1"
+			cursor.execute(sql, (booking_trip_attractionid,))
+			result = cursor.fetchone()
+			if result:
+				attraction_name = result[1]
+				attraction_address = result[2]
+				attraction_image = result[3]
+
+				data = {
+						"attraction": {
+							"id": booking_trip_attractionid,
+							"name": attraction_name,
+							"address": attraction_address,
+							"image": attraction_image
+						},
+						"date": booking_trip_date,
+						"time": booking_trip_time,
+						"price": booking_trip_price
+					}
+
+
+				return {"data": data}
+			else:
+				return {
+					"data": None
+				}
+		else:
+			return {
+				"data": None
+			}
+	except Exception as e:
+		if conn:
+			conn.rollback()
+		return {
+			"error": True,
+			"message": "登入失敗"
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()
+
+#建立新的預定行程
+# 定義請求模型
+class BookingTripInput(BaseModel):
+    attractionId: int = Field(..., gt=0, description="景點ID必須大於0")
+    date: str = Field(..., pattern=r'^\d{4}-\d{2}-\d{2}$', description="日期格式：YYYY-MM-DD")
+    time: Literal["morning", "afternoon"] = Field(..., description="時間：morning 或 afternoon")
+    price: Literal[2000, 2500] = Field(..., description="價格：2000 或 2500")
+
+
+@app.post("/api/booking")
+async def create_bookingtrip(booking_data: BookingTripInput, authorization:str = Header(None, alias="Authorization")):
+	if not authorization:
+		return {"error":True, "message":"尚未登入" }
+
+	user_info = verify_token(authorization)
+	if not user_info:
+		return {"error": True, "message": "未授權"}
+
+	conn = None
+	cursor = None
+	try: 
+		conn = get_connection()
+		cursor = conn.cursor()
+		member_id = user_info.get("id")
+		sql ="SELECT * FROM booking_trip WHERE booking_trip_memberid=%s AND booking_trip_validflag = 1"
+		cursor.execute(sql,(member_id,))
+		result = cursor.fetchone()
+
+		if not result:
+			sql="INSERT INTO booking_trip(booking_trip_memberid, booking_trip_attractionid, booking_trip_date, booking_trip_time, booking_trip_price) VALUES (%s, %s, %s, %s, %s)"
+			cursor.execute(sql,(member_id, booking_data.attractionId, booking_data.date, booking_data.time, booking_data.price))
+			conn.commit()
+			return {"ok": True}
+		
+		else:
+			sql="UPDATE booking_trip SET booking_trip_attractionid=%s, booking_trip_date=%s, booking_trip_time=%s, booking_trip_price=%s, booking_trip_status='process' WHERE booking_trip_memberid=%s"
+			cursor.execute(sql,(booking_data.attractionId, booking_data.date, booking_data.time, booking_data.price, member_id))
+			conn.commit()
+			return {"ok": True}
+		
+	except Exception as e:
+		if conn:
+			conn.rollback()
+		return {
+			"error": True,
+			"message": "登入失敗"
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()
+
+#刪除目前的預定行程
+@app.delete("/api/booking")
+async def delete_bookingtrip(authorization:str = Header(None, alias="Authorization")):
+	if not authorization:
+		return {"error":True, "message":"尚未登入" }
+
+	user_info = verify_token(authorization)
+	if not user_info:
+		return {"error": True, "message": "未授權"}
+
+	conn = None
+	cursor = None
+	try: 
+		conn = get_connection()
+		cursor = conn.cursor()
+		member_id = user_info.get("id")
+		sql = "UPDATE booking_trip SET booking_trip_status='deleted' WHERE booking_trip_memberid=%s"
+		cursor.execute(sql, (member_id,))
+		conn.commit()
+		return {"ok": True}
+
+	except Exception as e:
+		if conn:
+			conn.rollback()
+		return {
+			"error": True,
+			"message": "登入失敗"
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()
 
 
 # Static Pages (Never Modify Code in this Block)

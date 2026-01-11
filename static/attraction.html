@@ -14,7 +14,7 @@
     <div class="home__header">
       <div class="home__header__title" onclick="homepage()">台北一日遊 </div>
       <div class="home__header__button">
-        <button class="booking__btn">預定行程</button>
+        <button class="booking__btn" onclick="goto_bookingtrip()">預定行程</button>
         <button class="login__btn"  onclick="openLogin()">登入/註冊</button>
       </div>
     </div>
@@ -30,12 +30,24 @@
 
   <script src="/js/modal.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/bookingtrip.js"></script>
   <script>check_auth();</script>
+  <script>
+    // 設定日期選擇器的最小日期為今天
+    document.addEventListener('DOMContentLoaded', function() {
+      const dateInput = document.getElementById('select_date');
+      if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+      }
+    });
+  </script>
   
   <hr class="header__hr">
 
   <div class="attraction__container">
     <div class="attraction_area">
+      <!-- 插入登入彈窗 -->
       <div id="login-modal-container"></div>
       <div class="attraction__imgs">
         <img src="" alt="image" class="attraction__img">
@@ -53,12 +65,12 @@
           <div class="booking__box__form">
             <form action="" method="post">
               <div>
-                <label for="select_date">選擇日期：</label> <input type="date" name="select_date" id="select_date"> <br>
+                <label for="select_date">選擇日期：</label> <input type="date" name="select_date" id="select_date" min=""> <br>
               </div>
               <div class="select_time">
                 <span>選擇時間：</span>
-                <label for="forenoon" class="forenoon" onclick="forenoonCost()"> 
-                  <input type="radio" name="booking_time" value="forenoon" checked id="forenoon" onclick="forenoonCost()">上半天
+                <label for="morning" class="morning" onclick="morningCost()"> 
+                  <input type="radio" name="booking_time" value="morning" checked id="morning" onclick="morningCost()">上半天
                 </label>
                 <label for="afternoon" class="afternoon" onclick="afternoonCost()">
                   <input type="radio" name="booking_time" value="afternoon" id="afternoon" onclick="afternoonCost()">下半天
@@ -67,7 +79,7 @@
               <div class="tourguide_Fee">
                 <div>導覽費用：</div><div class="cost">新台幣 2000 元</div>
               </div>
-              <button type="submit" class="booking_button">開始預約行程</button>
+              <button type="submit" class="booking_button" onclick="booking_trip(event)">開始預約行程</button>
             </form>
           </div>
         </div>
@@ -203,13 +215,68 @@
       cost.innerHTML = '新台幣 2500 元'
     }
 
-    function forenoonCost(){
+    function morningCost(){
       const cost = document.querySelector('.cost');
       cost.innerHTML = '新台幣 2000 元'
     }
 
     function homepage() {
       window.location.href = '/';
+    }
+
+    //開始預約行程
+    async function booking_trip(event) {
+      // 1. 首先阻止預設行為
+      event.preventDefault();
+
+      // 2. 取得表單資料
+      const dateValue = document.getElementById("select_date").value;
+      const timeValue = document.querySelector('input[name="booking_time"]:checked').value;
+      const feeValue = document.querySelector(".cost").textContent;
+      // 取得費用的數字部分
+      const feeNumber = feeValue.match(/\d+/)[0]; // 取得 "2000" 或 "2500"
+
+      // 3. 驗證日期資料
+      if (!dateValue) {
+        alert('請選擇日期');
+        return;
+      }
+
+      //4. 檢查是否登入，如果沒有登入就跳出登入/註冊彈窗
+      check_auth();
+      const token = localStorage.getItem('token');
+      if (!token) {
+        openLogin();
+        return;
+      } 
+
+      //5.發送API請求建立預定行程
+      const attractionId = parseInt(window.location.pathname.split('/').pop());
+
+      let response = await fetch ("/api/booking", {
+        method: "POST",
+        headers:{
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          "attractionId": attractionId,
+          "date": dateValue,
+          "time": timeValue,
+          "price": parseInt(feeNumber)
+        })
+      });
+      let result = await response.json();
+      //建立成功，轉導到預定頁面
+      if (result.ok){
+        window.location.href = "/booking";
+        return;
+      }
+
+      //建立失敗
+      if (result.error){
+        alert("預約失敗");
+      }    
     }
   </script>
 
