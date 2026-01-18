@@ -88,7 +88,7 @@ async function check_auth() {
     if (!token) {
         login__btn.textContent = "登入/註冊";
         // 檢查當前 URL，如果是 /booking 就轉導回首頁
-        if (window.location.pathname === '/booking') {
+        if (window.location.pathname === '/booking'|| window.location.pathname === '/thankyou') {
             window.location.href = '/';
         }
         return;
@@ -112,7 +112,7 @@ async function check_auth() {
       login__btn.textContent = "登入/註冊";
       login__btn.setAttribute('onclick', 'openLogin()');
       // 檢查當前 URL，如果是 /booking 就轉導回首頁
-      if (window.location.pathname === '/booking') {
+      if (window.location.pathname === '/booking' || window.location.pathname === '/thankyou') {
         window.location.href = '/';
       }
     }
