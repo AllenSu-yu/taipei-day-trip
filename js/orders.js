@@ -68,6 +68,11 @@ async function get_orders(userData = null) {
     let attraction_image = result.data.trip.attraction.image;
     let date = result.data.trip.date;
     let time = result.data.trip.time;
+    // 使用物件映射
+    const booking_time = {
+      'morning': '早上9點到下午4點',
+      'afternoon': '下午2點到晚上9點'
+    }[time] || '';
     let contact_name = result.data.contact.name;
     let contact_email = result.data.contact.email;
     let contact_phone = result.data.contact.phone;
@@ -77,7 +82,7 @@ async function get_orders(userData = null) {
       orders_information.innerHTML = `
         <div class="order-item">訂購成功，您的訂單編號為：<span class="date"> ${number}</span></div>
         <div class="order-item">日期：<span class="date"> ${date}</span></div>
-        <div class="order-item">時間：<span class="time"> ${time}</span></div>
+        <div class="order-item">時間：<span class="time"> ${booking_time}</span></div>
         <div class="order-item">費用：<span class="price"> 新台幣${price}元</span></div>
         <div class="order-item">地點：<span class="adress"> ${attraction_address}</span></div>`
     }
@@ -92,6 +97,11 @@ async function get_orders(userData = null) {
     let attraction_image = result.data.trip.attraction.image;
     let date = result.data.trip.date;
     let time = result.data.trip.time;
+    // 使用物件映射
+    const booking_time = {
+      'morning': '早上9點到下午4點',
+      'afternoon': '下午2點到晚上9點'
+    }[time] || '';
     let contact_name = result.data.contact.name;
     let contact_email = result.data.contact.email;
     let contact_phone = result.data.contact.phone;
@@ -101,7 +111,7 @@ async function get_orders(userData = null) {
       orders_information.innerHTML = `
         <div class="order-item">付款失敗，您的訂單編號為：<span class="date"> ${number}</span></div>
         <div class="order-item">日期：<span class="date"> ${date}</span></div>
-        <div class="order-item">時間：<span class="time"> ${time}</span></div>
+        <div class="order-item">時間：<span class="time"> ${booking_time}</span></div>
         <div class="order-item">費用：<span class="price"> 新台幣${price}元</span></div>
         <div class="order-item">地點：<span class="adress"> ${attraction_address}</span></div>`
     }
