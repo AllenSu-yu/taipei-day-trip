@@ -75,11 +75,11 @@ async function get_orders(userData = null) {
     const orders_information = document.querySelector(".orders_information");
     if(orders_information){
       orders_information.innerHTML = `
-        <div>訂購成功，您的訂單編號為：<span class="date"> ${number}</span></div>
-        <div>日期：<span class="date"> ${date}</span></div>
-        <div>時間：<span class="time"> ${time}</span></div>
-        <div>費用：<span class="price"> 新台幣${price}元</span></div>
-        <div>地點：<span class="adress"> ${attraction_address}</span></div>`
+        <div class="order-item">訂購成功，您的訂單編號為：<span class="date"> ${number}</span></div>
+        <div class="order-item">日期：<span class="date"> ${date}</span></div>
+        <div class="order-item">時間：<span class="time"> ${time}</span></div>
+        <div class="order-item">費用：<span class="price"> 新台幣${price}元</span></div>
+        <div class="order-item">地點：<span class="adress"> ${attraction_address}</span></div>`
     }
   }
 
