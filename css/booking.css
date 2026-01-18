@@ -397,6 +397,13 @@ footer > p {
     gap: 15px;
 }
 
+.payment_information-style > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+
 .contact_information_input {
     width: 200px;
     height: 38px;
@@ -451,6 +458,18 @@ footer > p {
     background-color: #448899;
     border: none;
     border-radius: 5px 5px 5px 5px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.summary_information_submit:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+.summary_information_submit:not(:disabled):hover {
+    background-color: #3a7282;
 }
 
 #desktop_delete {
