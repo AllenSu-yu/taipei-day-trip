@@ -1,3 +1,4 @@
+import random
 from fastapi import *
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles# 在 app = FastAPI() 之後加入
@@ -10,6 +11,8 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Literal
+import requests
+import json
 
 load_dotenv()  # 載入 .env 檔案
 app=FastAPI()
@@ -493,7 +496,7 @@ async def get_bookingtrip(authorization:str = Header(None, alias="Authorization"
 		if conn:
 			conn.close()
 
-#建立新的預定行程
+#建立新的預定行程(新增一個booking_trip將booking_trip_status設成'process')
 # 定義請求模型
 class BookingTripInput(BaseModel):
     attractionId: int = Field(..., gt=0, description="景點ID必須大於0")
@@ -546,7 +549,7 @@ async def create_bookingtrip(booking_data: BookingTripInput, authorization:str =
 		if conn:
 			conn.close()
 
-#刪除目前的預定行程
+#刪除目前的預定行程 (將booking_trip_status設成'deleted')
 @app.delete("/api/booking")
 async def delete_bookingtrip(authorization:str = Header(None, alias="Authorization")):
 	if not authorization:
@@ -579,6 +582,282 @@ async def delete_bookingtrip(authorization:str = Header(None, alias="Authorizati
 			cursor.close()
 		if conn:
 			conn.close()
+
+# 打去tappay完成付款
+def tappay_payment(prime,amount,phone_number,name,email):
+	# API URL (測試環境 )
+	url = "https://sandbox.tappaysdk.com/tpc/payment/pay-by-prime"
+
+	# Header
+	headers = {
+		"Content-Type": "application/json",
+		"x-api-key": os.getenv("x-api-key")  # 這裡放 Partner Key
+	}
+
+	# Body
+	payload = {
+		"prime": prime,       # 前端 SDK 取得的 prime
+		"partner_key": os.getenv("x-api-key"),   # 與 Header 一致
+		"merchant_id": "tppf_allensu_GP_POS_3",        # TapPay 後台設定的商店代號
+		"details": "TapPay Test",
+		"amount": amount,
+		"cardholder": {
+			"phone_number": phone_number,
+			"name": name,
+			"email": email
+		}
+	}
+
+	# 發送 POST 請求
+	response = requests.post(url, headers=headers, data=json.dumps(payload))
+
+	# 檢查回應
+	print("Status Code:", response.status_code)
+	response_data = response.json()
+	print("Response Body:", response_data)
+	
+	# 回傳狀態碼和回應內容
+	return response.status_code, response_data
+
+
+# 產生訂單編號邏輯
+def create_orders_number():
+	# 日期+時分秒+隨機數字三位數
+	now = datetime.datetime.now()
+	date_str = now.strftime("%Y%m%d%H%M%S")
+	random_num = random.randint(100, 999)  # 三位數隨機數字
+	orders_number = f"{date_str}{random_num}"
+	return orders_number
+
+
+
+
+#建立新的訂單
+# 定義請求模型
+class AttractionInput(BaseModel):
+	id: int = Field(..., gt=0, description="景點ID必須大於0")
+	name: str
+	address: str
+	image: str
+
+class TripInput(BaseModel):
+	attraction: AttractionInput
+	date: str = Field(..., pattern=r'^\d{4}-\d{2}-\d{2}$', description="日期格式：YYYY-MM-DD")
+	time: Literal["morning", "afternoon"] = Field(..., description="時間：morning 或 afternoon")
+
+class ContactInput(BaseModel):
+	name: str
+	email: EmailStr
+	phone: str
+
+class OrderInput(BaseModel):
+	price: Literal[2000, 2500] = Field(..., description="價格：2000 或 2500")
+	trip: TripInput
+	contact: ContactInput
+
+class CreateOrdersInput(BaseModel):
+	prime: str
+	order: OrderInput
+
+@app.post("/api/orders")
+async def create_orders(orders_data: CreateOrdersInput, authorization: str = Header(None, alias="Authorization")):
+	if not authorization:
+		return {"error":True, "message":"尚未登入" }
+
+	user_info = verify_token(authorization)
+	if not user_info:
+		return {"error": True, "message": "未授權"}
+	
+	# 存取嵌套資料範例：
+	# prime = orders_data.prime
+	# price = orders_data.order.price
+	# attraction_id = orders_data.order.trip.attraction.id
+	# attraction_name = orders_data.order.trip.attraction.name
+	# attraction_address = orders_data.order.trip.attraction.address
+	# attraction_image = orders_data.order.trip.attraction.image
+	# date = orders_data.order.trip.date
+	# time = orders_data.order.trip.time
+	# contact_name = orders_data.order.contact.name
+	# contact_email = orders_data.order.contact.email
+	# contact_phone = orders_data.order.contact.phone
+	
+	conn = None
+	cursor = None
+	try: 
+		conn = get_connection()
+		cursor = conn.cursor()
+		
+		sql = "INSERT INTO orders(order_number, order_booking_trip_id, order_member_id, order_price, order_attraction_id, order_attraction_name, order_attraction_address, order_attraction_image, order_date, order_time, order_contact_name, order_contact_email, order_contact_phone) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+		member_id = user_info.get("id")
+		order_number = create_orders_number()
+		
+		# 取得 booking_trip_id
+		sql_booking = "SELECT booking_trip_id FROM booking_trip WHERE booking_trip_memberid=%s AND booking_trip_validflag = 1 AND booking_trip_status='process'"
+		cursor.execute(sql_booking, (member_id,))
+		booking_result = cursor.fetchone()
+		booking_trip_id = booking_result[0] if booking_result else None
+
+		# 建立訂單
+		cursor.execute(sql, (
+			order_number,
+			booking_trip_id,
+			member_id,
+			orders_data.order.price,
+			orders_data.order.trip.attraction.id,
+			orders_data.order.trip.attraction.name,
+			orders_data.order.trip.attraction.address,
+			orders_data.order.trip.attraction.image,
+			orders_data.order.trip.date,
+			orders_data.order.trip.time,
+			orders_data.order.contact.name,
+			orders_data.order.contact.email,
+			orders_data.order.contact.phone,
+		))
+
+		# 打去TapPay付款
+		payment_status, payment_response = tappay_payment(
+			orders_data.prime,
+			orders_data.order.price,
+			orders_data.order.contact.phone,
+			orders_data.order.contact.name,
+			orders_data.order.contact.email
+		)
+
+		# 判斷付款是否成功（HTTP 200 且回應中的 status 為 0）
+		is_payment_success = (payment_status == 200 and payment_response.get("status") == 0)
+		
+		if is_payment_success:
+			# 如果付款成功，將order_payment_status狀態更新為paid，將booking_trip_status更新為completed
+			sql_update_order = "UPDATE orders SET order_payment_status = 'PAID' WHERE order_number = %s"
+			cursor.execute(sql_update_order, (order_number,))
+
+			# 更新預定行程狀態為 completed
+			if booking_trip_id:
+				sql_update_booking = "UPDATE booking_trip SET booking_trip_status = 'completed' WHERE booking_trip_id = %s"
+				cursor.execute(sql_update_booking, (booking_trip_id,))
+			
+			payment_message = "付款成功"
+		else:
+			# 付款失敗，訂單狀態保持 UNPAID
+			payment_message = payment_response.get("msg", "付款失敗")
+
+		conn.commit()
+		
+		# 回傳訂單建立成功，包含付款狀態
+		return {
+			"data": {
+				"number": order_number,
+				"payment": {
+					"status": payment_response.get("status", -1),
+					"message": payment_message
+				}
+			}
+		}
+		
+	except Exception as e:
+		if conn:
+			conn.rollback()
+		# 根據不同錯誤情境回傳對應訊息
+		error_message = "建立訂單失敗"
+		if "booking_trip" in str(e).lower():
+			error_message = "找不到預定行程，請先預定行程"
+		elif "foreign key" in str(e).lower():
+			error_message = "資料驗證失敗，請檢查輸入資料"
+		elif "not null" in str(e).lower():
+			error_message = "請填寫所有必填欄位"
+		
+		return {
+			"error": True,
+			"message": error_message
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()
+
+
+@app.get("/api/order/{orderNumber}")
+async def get_orders(orderNumber:str, authorization:str = Header(None, alias="Authorization")):
+	if not authorization:
+		return {"error":True, "message":"尚未登入" }
+
+	user_info = verify_token(authorization)
+	if not user_info:
+		return {"error": True, "message": "未授權"}
+
+	conn = None
+	cursor = None
+	try: 
+		conn = get_connection()
+		cursor = conn.cursor(dictionary=True)
+		member_id = user_info.get("id")
+		sql = """
+			SELECT 	order_payment_status, order_price, order_attraction_id, 
+					order_attraction_name, order_attraction_address, order_attraction_image, 
+					order_date, order_time, order_contact_name, order_contact_email, order_contact_phone 
+			FROM orders 
+			WHERE order_number=%s AND order_member_id=%s AND order_validflag=1
+		"""
+		cursor.execute(sql, (orderNumber, member_id))
+		result=cursor.fetchone()
+
+		if not result:  # 先檢查 result 是否存在
+			return {"data":None}
+		
+		if result['order_payment_status'] == 'PAID':
+			status = 1
+		else: status = 0
+		
+		if result:
+			order_detail = {
+				"data": {
+					"number": orderNumber,
+					"price": result['order_price'],
+					"trip": {
+						"attraction": {
+							"id": result['order_attraction_id'],
+							"name": result['order_attraction_name'],
+							"address": result['order_attraction_address'],
+							"image": result['order_attraction_image']
+						},
+						"date": str(result['order_date']),  # 轉換為字串格式
+						"time": result['order_time']
+					},
+					"contact": {
+						"name": result['order_contact_name'],
+						"email": result['order_contact_email'],
+						"phone": result['order_contact_phone']
+					},
+					"status": status
+				}
+			}
+			return order_detail
+		else:
+			return {"data":None}
+
+	except Exception as e:
+		return {
+			"error": True,
+			"message": "訂單查詢失敗"
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()	
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Static Pages (Never Modify Code in this Block)

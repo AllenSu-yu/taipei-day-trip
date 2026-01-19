@@ -1,0 +1,206 @@
+body {
+    margin: 0;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+
+header {
+    display: flex;
+    justify-content: center;
+    height: 54px;
+    font-family: 'Noto Sans TC', sans-serif;
+    max-width: 1920px;
+    width: 100%;
+    /* border-bottom: 1px solid #c70f3d; */
+}
+
+
+/* footer {
+    margin-top: 40px;
+    position: relative;
+}
+
+footer >img {
+  height: 104px;
+  max-width: 1920px;
+  width: 100%;
+} */
+
+footer > p {
+  position: absolute;  /* 絕對定位 */
+  top: 41px;          /* 對齊底部 */
+  left: 0;            /* 對齊左側 */
+  right: 0;           /* 對齊右側 */
+  text-align: center;
+  margin: 0;
+  color: white;      /* 文字顏色 */
+  font-size: 16px;
+  font-weight: 700;
+}
+
+
+footer {
+    height: 865px;
+    position: relative;
+}
+
+footer >img {
+    height: 865px;
+    max-width: 1920px;
+    width: 100%;
+}
+
+.home__header {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 34px;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+    /* border: 1px solid #c70f3d; */
+}
+
+.home__header__title {
+    font-size: 30px;
+    font-weight: 700;
+    color:#448899;
+    padding: 10px;
+    white-space: nowrap;
+    cursor: pointer;
+    /* border: 1px solid #c70f3d; */
+}
+
+
+.home__header__button {
+    display: flex;
+    padding-right: 10px;
+}
+
+.home__header__button > .booking__btn, 
+.home__header__button > .login__btn {
+    border: none;           /* 移除預設邊框 */
+    background: none;       /* 移除預設背景 */  
+    margin:10px;
+    font-weight: 500;
+    color: #666666;
+    font-size: 16px;    
+    cursor: pointer;        /* 顯示手型游標 */
+    padding: 0;             /* 移除預設 padding */
+}
+
+.header__hr {
+    border: none;              /* 移除預設邊框 */
+    border-top: 1px solid #E8E8E8;  /* 或使用 border-top 來顯示線條 */
+    height: 0;                 /* hr 的高度應該為 0，用 border 來顯示 */
+    max-width: 1920px;
+    width: 100%;               /* 確保寬度填滿 */
+    margin: 0;                 /* 移除預設 margin */
+    margin-top: 5px;
+}
+
+
+.orders__container {
+    height: 297px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+
+.welcome {
+    height: 27px;
+    max-width: 1000px;
+    width: 100%;
+    font-weight: 700;
+    font-size: 19px;
+    color: #666666;
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.orders_information {
+    max-width: 1000px;
+    width: 100%;
+    font-weight: 400;
+    font-size: 16px;
+    color: #666666;
+    margin-bottom: 40px;
+}
+
+.orders_information .order-item {
+    /* 只針對 .orders_information 的直接子元素 div */
+    font-weight: 700;
+}
+
+.order-item > span{
+    font-weight: 400;
+}
+
+
+
+/* 平板尺寸（1200px 以下）：3 列 */
+@media (max-width: 1200px) {
+    body {
+        padding: 10px;
+    }
+    
+    footer {
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+  }
+
+  
+/* 手機尺寸（500px 以下）*/
+@media (max-width: 500px) {
+    footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    footer img {
+        width: 360px;
+        min-width: 360px;
+        height: 104px;
+    }
+
+    .home__header {
+        width: 360px;
+    }
+
+    .home__header__title {
+        padding-left: 10px;
+        padding-right: 10px;
+        /* border: 1px solid #c70f3d; */
+    }
+
+    .header__hr {
+        width: 340px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .welcome, .orders_information {
+        width: 340px;
+    }
+
+
+    .divider__hr {
+        margin: 30px auto;
+        width: 340px;                 
+    }
+
+ 
+    .contact_information {
+        height: 200px;    
+        width: 340px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+}
