@@ -1,0 +1,15 @@
+{
+    // 隱藏檔案和資料夾
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/*.pyc": true,
+      "**/*.pyo": true,
+      "**/*.pyd": true,
+      "**/.Python": true
+    },
+    // 在檔案總管中隱藏
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "*.py": "__pycache__"
+    }
+  }
