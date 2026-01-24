@@ -7,6 +7,7 @@ from mysql.connector import pooling
 import os
 from dotenv import load_dotenv
 import datetime
+import time
 import jwt
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, EmailStr, Field
@@ -34,252 +35,340 @@ try:
 	cnxpool = pooling.MySQLConnectionPool(
 		pool_name="mypool",
 		pool_size=5,
+		pool_reset_session=True,  # 重置連線 session，確保連線狀態乾淨
+		autocommit=False,  # 明確設定 autocommit，避免非預期的事務問題
 		**dbconfig
 	)
 except Exception as e:
 	raise RuntimeError(f"無法建立資料庫連線池:{e}")
 
 def get_connection():
-	"""從連線池取出一個連線"""
-	try:
-		return cnxpool.get_connection()
-	except Exception as e:
-		raise RuntimeError(f"無法從連線池取得連線:{e}")
+	"""
+	從連線池取出一個連線，並確保連線有效
+	包含連線健康檢查和自動重試機制
+	"""
+	max_retries = 5
+	retry_delay = 0.1  # 重試間隔（秒）
+	
+	for attempt in range(max_retries):
+		conn = None
+		try:
+			# 【步驟 1】從連線池取得連線
+			conn = cnxpool.get_connection()
+			
+			# 【步驟 2】檢查連線是否有效
+			if not conn.is_connected():
+				# 連線失效，歸還到池中並重新取得
+				print(f"嘗試 {attempt + 1}: 連線失效，重新取得...")
+				
+				# 關鍵：即使連線失效，也要歸還到池中
+				# 這樣連線池才能釋放這個「槽位」，下次可以建立新連線
+				try:
+					conn.close()  # 歸還連線到池中（連線池會處理失效連線）
+				except:
+					pass
+				conn = None #清除連線物件的引用
+				
+				if attempt < max_retries - 1:
+					time.sleep(retry_delay)
+					continue  # 重新取得連線
+				else:
+					raise RuntimeError("無法取得有效的資料庫連線")
+			
+			return conn
+
+		except Exception as e:
+			if conn:
+				try:
+					conn.close()  # 確保歸還連線
+				except:
+					pass
+			conn = None
+			
+			if attempt == max_retries - 1:
+				raise RuntimeError(f"無法取得連線: {e}")
+			
+			time.sleep(retry_delay)
+			continue
+	
+	raise RuntimeError("無法取得有效的資料庫連線")
 
 
 @app.get("/api/attractions")
 async def get_attractions(request:Request, page:int = Query(...,ge=0), category:str = Query(None), keyword:str = Query(None)):
-	conn = get_connection()
-	cursor = conn.cursor()
-	
+	conn = None
+	cursor = None
+	try:
+		conn = get_connection()
+		cursor = conn.cursor()
+		
 
-	#組裝回傳的data
-	if category:
-		category=category.strip('"\'')
-	if keyword:
-		keyword=keyword.strip('"\'')
-		MRT=keyword
-		name=f"%{keyword}%"
+		#組裝回傳的data
+		if category:
+			category=category.strip('"\'')
+		if keyword:
+			keyword=keyword.strip('"\'')
+			MRT=keyword
+			name=f"%{keyword}%"
 
-	search_data = []
-	nextPage = None
-	all_pages=0
-	attraction_in_page = 8
-	offset = attraction_in_page *(page)
-	if category and keyword:
-		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE CAT= %s AND (MRT = %s OR name like %s)  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
-		cursor.execute(sql,(category,MRT,name,offset))
-		search_data = cursor.fetchall()
-		#計算總共有幾頁
-		sql = "SELECT COUNT(*) FROM attraction WHERE CAT= %s AND (MRT = %s OR name like %s)"
-		cursor.execute(sql,(category,MRT,name))
-		all_count=cursor.fetchone()[0]
-		if all_count%attraction_in_page ==0:
-			all_pages = all_count//attraction_in_page
-			if all_pages == 0:
-				all_pages = 1
+		search_data = []
+		nextPage = None
+		all_pages=0
+		attraction_in_page = 8
+		offset = attraction_in_page *(page)
+		if category and keyword:
+			sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE CAT= %s AND (MRT = %s OR name like %s)  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
+			cursor.execute(sql,(category,MRT,name,offset))
+			search_data = cursor.fetchall()
+			#計算總共有幾頁
+			sql = "SELECT COUNT(*) FROM attraction WHERE CAT= %s AND (MRT = %s OR name like %s)"
+			cursor.execute(sql,(category,MRT,name))
+			all_count=cursor.fetchone()[0]
+			if all_count%attraction_in_page ==0:
+				all_pages = all_count//attraction_in_page
+				if all_pages == 0:
+					all_pages = 1
+			else:
+				all_pages = all_count//attraction_in_page+1
+				
+			if page >= all_pages-1:
+				nextPage = None
+			elif page>=0:
+				nextPage = page+1
+		elif category:
+			sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE CAT= %s  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
+			cursor.execute(sql,(category,offset))
+			search_data = cursor.fetchall()
+			#計算總共有幾頁
+			sql = "SELECT COUNT(*) FROM attraction WHERE CAT= %s"
+			cursor.execute(sql,(category,))
+			all_count=cursor.fetchone()[0]
+			if all_count%attraction_in_page ==0:
+				all_pages = all_count//attraction_in_page
+				if all_pages == 0:
+					all_pages = 1
+			else:
+				all_pages = all_count//attraction_in_page+1
+				
+			if page >= all_pages-1:
+				nextPage = None
+			elif page>=0:
+				nextPage = page+1
+		elif keyword:
+			sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE (MRT = %s OR name like %s)  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
+			cursor.execute(sql,(MRT,name,offset))
+			search_data = cursor.fetchall()
+			#計算總共有幾頁
+			sql = "SELECT COUNT(*) FROM attraction WHERE (MRT = %s OR name like %s)"
+			cursor.execute(sql,(MRT,name))
+			all_count=cursor.fetchone()[0]
+			if all_count%attraction_in_page ==0:
+				all_pages = all_count//attraction_in_page
+				if all_pages == 0:
+					all_pages = 1
+			else:
+				all_pages = all_count//attraction_in_page+1
+				
+			if page >= all_pages-1:
+				nextPage = None
+			elif page>=0:
+				nextPage = page+1
+		
 		else:
-			all_pages = all_count//attraction_in_page+1
-			
-		if page >= all_pages-1:
-			nextPage = None
-		elif page>=0:
-			nextPage = page+1
-	elif category:
-		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE CAT= %s  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
-		cursor.execute(sql,(category,offset))
-		search_data = cursor.fetchall()
-		#計算總共有幾頁
-		sql = "SELECT COUNT(*) FROM attraction WHERE CAT= %s"
-		cursor.execute(sql,(category,))
-		all_count=cursor.fetchone()[0]
-		if all_count%attraction_in_page ==0:
-			all_pages = all_count//attraction_in_page
-			if all_pages == 0:
-				all_pages = 1
-		else:
-			all_pages = all_count//attraction_in_page+1
-			
-		if page >= all_pages-1:
-			nextPage = None
-		elif page>=0:
-			nextPage = page+1
-	elif keyword:
-		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE (MRT = %s OR name like %s)  ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
-		cursor.execute(sql,(MRT,name,offset))
-		search_data = cursor.fetchall()
-		#計算總共有幾頁
-		sql = "SELECT COUNT(*) FROM attraction WHERE (MRT = %s OR name like %s)"
-		cursor.execute(sql,(MRT,name))
-		all_count=cursor.fetchone()[0]
-		if all_count%attraction_in_page ==0:
-			all_pages = all_count//attraction_in_page
-			if all_pages == 0:
-				all_pages = 1
-		else:
-			all_pages = all_count//attraction_in_page+1
-			
-		if page >= all_pages-1:
-			nextPage = None
-		elif page>=0:
-			nextPage = page+1
-	
-	else:
-		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
-		cursor.execute(sql,(offset, ))
-		search_data = cursor.fetchall()
-		#計算總共有幾頁
-		sql = "SELECT COUNT(*) FROM attraction"
-		cursor.execute(sql)
-		all_count=cursor.fetchone()[0]
-		if all_count%attraction_in_page ==0:
-			all_pages = all_count//attraction_in_page
-			if all_pages == 0:
-				all_pages = 1
-		else:
-			all_pages = all_count//attraction_in_page+1
-			
-		if page >= all_pages-1:
-			nextPage = None
-		elif page>=0:
-			nextPage = page+1
+			sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction ORDER BY attraction_id ASC LIMIT 8 OFFSET %s"
+			cursor.execute(sql,(offset, ))
+			search_data = cursor.fetchall()
+			#計算總共有幾頁
+			sql = "SELECT COUNT(*) FROM attraction"
+			cursor.execute(sql)
+			all_count=cursor.fetchone()[0]
+			if all_count%attraction_in_page ==0:
+				all_pages = all_count//attraction_in_page
+				if all_pages == 0:
+					all_pages = 1
+			else:
+				all_pages = all_count//attraction_in_page+1
+				
+			if page >= all_pages-1:
+				nextPage = None
+			elif page>=0:
+				nextPage = page+1
 
 
-	##找出所有的attraction_id
-	ids = []
-	for i in search_data:
-		attraction_id = i[0]
-		ids.append(attraction_id)
+		##找出所有的attraction_id
+		ids = []
+		for i in search_data:
+			attraction_id = i[0]
+			ids.append(attraction_id)
 
-	if ids:
-		# 使用參數化查詢，避免 SQL 注入和語法錯誤
-		placeholders = ','.join(['%s'] * len(ids))
-		sql = f"SELECT attraction_id,file FROM image WHERE attraction_id IN ({placeholders}) ORDER BY attraction_id ASC"
-		cursor.execute(sql, tuple(ids))
-		search_image = cursor.fetchall()	
-	else:
-		search_image = []
-	
-	data = []	
-	for i in search_data:
-		images = []
-		for image in search_image:
-			if image[0] == i[0]:
-				images.append(image[1])
-		attraction = {
-			"id": i[0],
-			"name": i[1],
-			"category": i[2],
-			"description": i[3],
-			"address": i[4],
-			"transport": i[5],
-			"mrt": i[6],
-			"lat": i[7],
-			"lng": i[8],
-			"images" : images
+		if ids:
+			# 使用參數化查詢，避免 SQL 注入和語法錯誤
+			placeholders = ','.join(['%s'] * len(ids))
+			sql = f"SELECT attraction_id,file FROM image WHERE attraction_id IN ({placeholders}) ORDER BY attraction_id ASC"
+			cursor.execute(sql, tuple(ids))
+			search_image = cursor.fetchall()	
+		else:
+			search_image = []
+		
+		data = []	
+		for i in search_data:
+			images = []
+			for image in search_image:
+				if image[0] == i[0]:
+					images.append(image[1])
+			attraction = {
+				"id": i[0],
+				"name": i[1],
+				"category": i[2],
+				"description": i[3],
+				"address": i[4],
+				"transport": i[5],
+				"mrt": i[6],
+				"lat": i[7],
+				"lng": i[8],
+				"images" : images
+			}
+			data.append(attraction)
+			
+			
+		response = {
+			"nextPage":nextPage,
+			"data": data
 		}
-		data.append(attraction)
-		
-		
-	response = {
-		"nextPage":nextPage,
-		"data": data
-	}
 
-	cursor.close()
-	conn.close()
-	return response
+		return response
+	except Exception as e:
+		return {
+			"error": True,
+			"message": f"查詢失敗: {str(e)}"
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()
 
 @app.get("/api/attraction/{attractionId}")
 async def get_attraction_byId(request:Request,attractionId:int):
-	conn = get_connection()
-	cursor = conn.cursor()
-	
-	sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE attraction_id=%s"
-	cursor.execute(sql, (attractionId,))
-	search_data = cursor.fetchall()
-	if search_data:
-		attraction = search_data[0]
-	else:
-		error_message = {
-			"error":True,
-			"message":"景點編號不正確"
+	conn = None
+	cursor = None
+	try:
+		conn = get_connection()
+		cursor = conn.cursor()
+		
+		sql = "SELECT attraction_id,name,CAT,description,address,direction,MRT,latitude,longitude FROM attraction WHERE attraction_id=%s"
+		cursor.execute(sql, (attractionId,))
+		search_data = cursor.fetchall()
+		if search_data:
+			attraction = search_data[0]
+		else:
+			error_message = {
+				"error":True,
+				"message":"景點編號不正確"
+			}
+			return error_message
+
+		sql = "SELECT attraction_id,file FROM image WHERE attraction_id = %s ORDER BY attraction_id ASC"
+		cursor.execute(sql, (attractionId,))
+		search_image = cursor.fetchall()	
+
+		images = []
+		for image in search_image:
+			if image[0] == attractionId:
+				images.append(image[1])
+		data = {
+			"id": attraction[0],
+			"name": attraction[1],
+			"category": attraction[2],
+			"description": attraction[3],
+			"address": attraction[4],
+			"transport": attraction[5],
+			"mrt": attraction[6],
+			"lat": attraction[7],
+			"lng": attraction[8],
+			"images" : images
 		}
-		cursor.close()
-		conn.close()
-		return error_message
 
-	sql = "SELECT attraction_id,file FROM image WHERE attraction_id = %s ORDER BY attraction_id ASC"
-	cursor.execute(sql, (attractionId,))
-	search_image = cursor.fetchall()	
+		
+		response = {
+			"data": data
+		}
 
-	images = []
-	for image in search_image:
-		if image[0] == attractionId:
-			images.append(image[1])
-	data = {
-		"id": attraction[0],
-		"name": attraction[1],
-		"category": attraction[2],
-		"description": attraction[3],
-		"address": attraction[4],
-		"transport": attraction[5],
-		"mrt": attraction[6],
-		"lat": attraction[7],
-		"lng": attraction[8],
-		"images" : images
-	}
-
-	
-	response = {
-		"data": data
-	}
-
-	cursor.close()
-	conn.close()
-	return response
+		return response
+	except Exception as e:
+		return {
+			"error": True,
+			"message": f"查詢失敗: {str(e)}"
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()
 
 @app.get("/api/categories")
 async def get_categories(request:Request):
-	conn = get_connection()
-	cursor = conn.cursor()
+	conn = None
+	cursor = None
+	try:
+		conn = get_connection()
+		cursor = conn.cursor()
 
-	sql = "SELECT DISTINCT CAT FROM attraction"
-	cursor.execute(sql)
-	search_data = cursor.fetchall()
-	
-	data = []
-	for i in search_data:
-		data.append(i[0])
+		sql = "SELECT DISTINCT CAT FROM attraction"
+		cursor.execute(sql)
+		search_data = cursor.fetchall()
+		
+		data = []
+		for i in search_data:
+			data.append(i[0])
 
-	response = {
-		"data":data
-	}
+		response = {
+			"data":data
+		}
 
-	cursor.close()
-	conn.close()
-	return response
+		return response
+	except Exception as e:
+		return {
+			"error": True,
+			"message": f"查詢失敗: {str(e)}"
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()
 
 @app.get("/api/mrts")
 async def get_mrts(request:Request):
-	conn = get_connection()
-	cursor = conn.cursor()
+	conn = None
+	cursor = None
+	try:
+		conn = get_connection()
+		cursor = conn.cursor()
 
-	sql = "SELECT MRT, COUNT(*) AS 出現次數 FROM attraction WHERE MRT IS NOT NULL GROUP BY MRT ORDER BY 出現次數 DESC"
-	cursor.execute(sql)
-	search_data = cursor.fetchall()
-	
-	data = []
-	for i in search_data:
-		data.append(i[0])
+		sql = "SELECT MRT, COUNT(*) AS 出現次數 FROM attraction WHERE MRT IS NOT NULL GROUP BY MRT ORDER BY 出現次數 DESC"
+		cursor.execute(sql)
+		search_data = cursor.fetchall()
+		
+		data = []
+		for i in search_data:
+			data.append(i[0])
 
-	response = {
-		"data":data
-	}
+		response = {
+			"data":data
+		}
 
-	cursor.close()
-	conn.close()
-	return response
+		return response
+	except Exception as e:
+		return {
+			"error": True,
+			"message": f"查詢失敗: {str(e)}"
+		}
+	finally:
+		if cursor:
+			cursor.close()
+		if conn:
+			conn.close()
 
 
 
